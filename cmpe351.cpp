@@ -3,10 +3,12 @@
 #include <fstream>
 #include <string>
 using namespace std;
+void menu();
 void fcfs();
 void sjf();
 void priority();
 void rr();
+void result();
 int main(int argc, char* argv[])
 {
 
@@ -57,32 +59,84 @@ int main(int argc, char* argv[])
     inputFile.close();
     cout<< "File contents: \n" << fileContents <<endl;
 
-    cout <<"CPU Scheduler Simulator"<<endl;
-    cout<<"choose your Scheduling Method (None)"<<endl<<"1-first come first served "<<
-    endl<<"2-shortest job first"<<endl<<"3-priority scheduling"<<endl<<"4-Round-Robin"<<endl<<"5-none";
-   int ch;
-   cin>>ch;
+    menu();
+    return 0;
 
-   switch (ch)
+}
+void menu(){
+	cout <<"CPU Scheduler Simulator"<<endl;
+    cout<<"1) choosing Scheduling Method "<<endl<<"2) choosing Preemptive Mode"<<endl<<"3) Show Result"<<endl<<"4) End Program"<<endl;
+    int menuchoose; 
+    cin>>menuchoose;
+
+    bool preemtive;
+    int preemtivechoose;
+    int methodchoice;
+    switch (menuchoose)
    {
-   case 1:
+   case 1: 
+    cout<<"choose your Scheduling Method (None)"<<endl<<"1-first come first served "<<
+    endl<<"2-shortest job first"<<endl<<"3-priority scheduling"<<endl<<"4-Round-Robin"<<endl<<"5-none"<<"6-back to menu"<<endl;
+    cin>>methodchoice;
+   menu();
+     break;
+
+   case 2: 
+    cout<<"1-preemtive mode on "<<endl<<"2-preemtive mode off"<<endl;
+    cin>>preemtivechoose;
+    if(preemtivechoose==1)
+    preemtive=true;
+    else
+    preemtive=false;
+    break;
+
+   case 3: result();
 
     break;
 
-   case 2:
-
-    break;
-
-   case 3:
-
-    break;
-
-   case 4:
+	case 4: exit(1);
 
     break;
    
-   default:
+   default:menu();
     break;
    }
-    return 0;
+    
+   switch (methodchoice)
+   {
+   case 1: fcfs();
+
+    break;
+
+   case 2: sjf();
+
+    break;
+
+   case 3: priority();
+
+    break;
+
+   case 4: rr();
+
+    break;
+   
+   default:menu();
+    break;
+   }
+    
+}
+void fcfs(){
+	
+}
+void sjf(){
+	
+}
+void priority(){
+	
+}
+void rr(){
+	
+}
+void result(){
+	
 }
