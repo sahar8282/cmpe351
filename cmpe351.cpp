@@ -9,8 +9,11 @@ void sjf();
 void priority();
 void rr();
 void result();
+void sort(struct node **);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
+void printList(struct node *); 
+
 struct node
 {
     int burst, arrival, priority;
@@ -199,3 +202,36 @@ struct node *createNode(int burst, int arrival, int priority)
     temp->next = NULL;
     return temp;
 }
+
+
+void printList(node* head) 
+{ 
+    while (head != NULL) 
+    { 
+        cout << head->data; 
+        if (head->next != NULL) 
+            cout << " -> "; 
+        head = head->next; 
+    } 
+    cout<<endl; 
+} 
+  
+
+void sort(node** head) 
+{ 
+    node* last = (*head); 
+    node* first = (*head)->next; 
+     while (first != NULL) 
+    { 
+        if (first->arrival < last->arrival)
+        {
+            last->next = first->next;
+            first->next = (*head); 
+            (*head) = first;
+            first = last;
+        } 
+        else
+            last = first; 
+            first = first->next;
+}
+} 
