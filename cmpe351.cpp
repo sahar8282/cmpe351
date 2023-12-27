@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <fstream>
 #include <string>
+#include <sstream>
+
 using namespace std;
 void menu();
 void fcfs();
@@ -13,7 +15,6 @@ void sort(struct node **);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
 
-
 struct node
 {
     int burst, arrival, priority;
@@ -22,6 +23,8 @@ struct node
 
 int main(int argc, char *argv[])
 {
+
+    struct node *process;
 
     if (argc < 5)
     {
@@ -42,7 +45,7 @@ int main(int argc, char *argv[])
             if (i + 1 < argc)
             {
 
-                inputFilename = argv[i + 1];
+                inputFilename = string(argv[i + 1]);
             }
             else
             {
@@ -56,12 +59,10 @@ int main(int argc, char *argv[])
 
             if (i + 1 < argc)
             {
-
-                outputFilename = argv[i + 1];
+                outputFilename = string(argv[i + 1]);
             }
             else
             {
-
                 cout << "No output file after -o" << endl;
                 return 1;
             }
@@ -75,11 +76,29 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    string fileContents((istreambuf_iterator<char>(inputFile)), istreambuf_iterator<char>());
-
+    stringstream b;
+    b << inputFile.rdbuf();
     inputFile.close();
-    cout << "File contents: \n"
-         << fileContents << endl;
+    string fileContents = b.str();
+    cout << fileContents << endl;
+
+    istringstream iss(fileContents);
+    string line;
+    while (getline(iss, line, '\n'))
+    {
+        istringstream iss2(line);
+        string num1, num2, num3;
+        char delimiter = ':';
+        getline(iss2, num1, delimiter);
+        getline(iss2, num2, delimiter);
+        getline(iss2, num3, delimiter);
+        cout << "Number 1: " << stoi(num1) << endl;
+        cout << "Number 2: " << stoi(num2) << endl;
+        cout << "Number 3: " << stoi(num3) << endl;
+        cout << endl;
+
+        insertBack(process, num1, num2, num3);
+    }
 
     menu();
     return 0;
@@ -204,67 +223,68 @@ struct node *createNode(int burst, int arrival, int priority)
     return temp;
 }
 
-void sort(node** head) 
-{ 
-    node* last = (*head); 
-    node* first = (*head)->next; 
-     while (first != NULL) 
-    { 
+void sort(node **head)
+{
+    node *last = (*head);
+    node *first = (*head)->next;
+    while (first != NULL)
+    {
         if (first->arrival < last->arrival)
         {
             last->next = first->next;
-            first->next = (*head); 
+            first->next = (*head);
             (*head) = first;
             first = last;
-        } 
+        }
         else
-            last = first; 
-            first = first->next;
+            last = first;
+        first = first->next;
+    }
 }
-}
-int length(node* head){
-    node* temp = head ;
-    int len = 0 ;
-     while(temp!=NULL)
-     {
-         len++;
-         temp=temp->next ;
-     }
-    return  len;
+int length(node *head)
+{
+    node *temp = head;
+    int len = 0;
+    while (temp != NULL)
+    {
+        len++;
+        temp = temp->next;
+    }
+    return len;
 }
 
-node* sort(node* head){
-    node * i=head;
-    int len=length(head);
-    int itr=0;
-    while(itr<len)
+node *sort(node *head)
+{
+    node *i = head;
+    int len = length(head);
+    int itr = 0;
+    while (itr < len)
     {
-        node *j=head;
-        node *prev=head;
-        while(j->next)
+        node *j = head;
+        node *prev = head;
+        while (j->next)
         {
-            node* temp=j->next;
-            if(j->arrival>temp->arrival)
+            node *temp = j->next;
+            if (j->arrival > temp->arrival)
             {
-                if(j==head)
+                if (j == head)
                 {
-                    j->next=temp->next;
-                    temp->next=j;
-                    prev=temp;
-                    head=prev;
+                    j->next = temp->next;
+                    temp->next = j;
+                    prev = temp;
+                    head = prev;
                 }
                 else
                 {
-                    j->next=temp->next;
-                    temp->next=j;
-                    prev->next=temp;
-                    prev=temp;
+                    j->next = temp->next;
+                    temp->next = j;
+                    prev->next = temp;
+                    prev = temp;
                 }
                 continue;
             }
-            prev=j;
-            j=j->next;
-            
+            prev = j;
+            j = j->next;
         }
         ++itr;
     }
