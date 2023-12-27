@@ -12,13 +12,14 @@ void result();
 void sort(struct node **);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
-void printList(struct node *); 
+
 
 struct node
 {
     int burst, arrival, priority;
     struct node *next;
 };
+
 int main(int argc, char *argv[])
 {
 
@@ -203,20 +204,6 @@ struct node *createNode(int burst, int arrival, int priority)
     return temp;
 }
 
-
-void printList(node* head) 
-{ 
-    while (head != NULL) 
-    { 
-        cout << head->data; 
-        if (head->next != NULL) 
-            cout << " -> "; 
-        head = head->next; 
-    } 
-    cout<<endl; 
-} 
-  
-
 void sort(node** head) 
 { 
     node* last = (*head); 
@@ -234,4 +221,52 @@ void sort(node** head)
             last = first; 
             first = first->next;
 }
-} 
+}
+int length(node* head){
+    node* temp = head ;
+    int len = 0 ;
+     while(temp!=NULL)
+     {
+         len++;
+         temp=temp->next ;
+     }
+    return  len;
+}
+
+node* sort(node* head){
+    node * i=head;
+    int len=length(head);
+    int itr=0;
+    while(itr<len)
+    {
+        node *j=head;
+        node *prev=head;
+        while(j->next)
+        {
+            node* temp=j->next;
+            if(j->arrival>temp->arrival)
+            {
+                if(j==head)
+                {
+                    j->next=temp->next;
+                    temp->next=j;
+                    prev=temp;
+                    head=prev;
+                }
+                else
+                {
+                    j->next=temp->next;
+                    temp->next=j;
+                    prev->next=temp;
+                    prev=temp;
+                }
+                continue;
+            }
+            prev=j;
+            j=j->next;
+            
+        }
+        ++itr;
+    }
+    return head;
+}
