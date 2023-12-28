@@ -19,7 +19,8 @@ struct node
     int burst, arrival, priority;
     struct node *next;
 };
-
+string inputFilename;
+string outputFilename;
 int main(int argc, char *argv[])
 {
     struct node *process = NULL;
@@ -31,8 +32,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    string inputFilename;
-    string outputFilename;
+ 
 
     for (int i = 1; i < argc; ++i)
     {
@@ -142,6 +142,7 @@ void menu(struct node *process)
             }
 
             break;
+
         case '2':
             sjf();
 
@@ -204,6 +205,8 @@ void rr()
 }
 void result()
 {
+    ofstream outputfile(outputFilename);
+   
 }
 
 struct node *insertBack(struct node *header, int burst, int arrival, int priority)
