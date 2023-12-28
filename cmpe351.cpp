@@ -3,15 +3,14 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-
 using namespace std;
-void menu();
-void fcfs();
+void menu(struct node *);
+void fcfs(struct node *);
 void sjf();
 void priority();
 void rr();
 void result();
-void sort(struct node **);
+struct node *sort(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
 
@@ -23,8 +22,7 @@ struct node
 
 int main(int argc, char *argv[])
 {
-
-    struct node *process;
+    struct node *process = NULL;
 
     if (argc < 5)
     {
@@ -97,28 +95,31 @@ int main(int argc, char *argv[])
         cout << "Number 3: " << stoi(num3) << endl;
         cout << endl;
 
-        insertBack(process, num1, num2, num3);
+        process = insertBack(process, stoi(num1), stoi(num2), stoi(num3));
     }
 
-    menu();
+    menu(process);
     return 0;
 }
-void menu()
+bool preemtive;
+void menu(struct node *process)
 {
+    char preemtivechoose;
+    char methodchoice;
+    char menuchoose;
+    cout <<endl<< "*************************************" << endl;
     cout << "CPU Scheduler Simulator" << endl;
     cout << "1) choosing Scheduling Method " << endl
          << "2) choosing Preemptive Mode" << endl
          << "3) Show Result" << endl
          << "4) End Program" << endl;
-    int menuchoose;
+    cout << "*************************************" << endl;
     cin >> menuchoose;
 
-    bool preemtive;
-    int preemtivechoose;
-    int methodchoice;
     switch (menuchoose)
     {
-    case 1:
+    case '1':
+        cout << "*************************************" << endl;
         cout << "choose your Scheduling Method (None)" << endl
              << "1-first come first served " << endl
              << "2-shortest job first" << endl
@@ -126,64 +127,71 @@ void menu()
              << "4-Round-Robin" << endl
              << "5-none"
              << "6-back to menu" << endl;
+        cout << "*************************************" << endl;
         cin >> methodchoice;
-        menu();
+
+        switch (methodchoice)
+        {
+        case '1':
+            if (!preemtive)
+                fcfs(process);
+            else
+            {
+                cout << "please turn off preemtive mod off" << endl;
+                menu(process);
+            }
+
+            break;
+        case '2':
+            sjf();
+
+            break;
+        case '3':
+            priority();
+
+            break;
+        case '4':
+            rr();
+
+            break;
+        default:
+            cout << "wrong";
+            menu(process);
+            break;
+        }
+
         break;
 
-    case 2:
+    case '2':
+        cout << "*************************************" << endl;
         cout << "1-preemtive mode on " << endl
              << "2-preemtive mode off" << endl;
+        cout << "*************************************" << endl;
         cin >> preemtivechoose;
-        if (preemtivechoose == 1)
+        if (preemtivechoose == '1')
             preemtive = true;
         else
             preemtive = false;
+        menu(process);
         break;
 
-    case 3:
+    case '3':
         result();
 
         break;
 
-    case 4:
+    case '4':
+        result();
         exit(1);
 
         break;
 
     default:
-        menu();
+        cout << "*************************************" << endl;
+        cout << "wrong choice";
+        menu(process);
         break;
     }
-
-    switch (methodchoice)
-    {
-    case 1:
-        fcfs();
-
-        break;
-
-    case 2:
-        sjf();
-
-        break;
-
-    case 3:
-        priority();
-
-        break;
-
-    case 4:
-        rr();
-
-        break;
-
-    default:
-        menu();
-        break;
-    }
-}
-void fcfs()
-{
 }
 void sjf()
 {
@@ -197,6 +205,7 @@ void rr()
 void result()
 {
 }
+
 struct node *insertBack(struct node *header, int burst, int arrival, int priority)
 {
     struct node *temp = createNode(burst, arrival, priority);
@@ -212,10 +221,11 @@ struct node *insertBack(struct node *header, int burst, int arrival, int priorit
     headertemp->next = temp;
     return header;
 }
+
 struct node *createNode(int burst, int arrival, int priority)
 {
     struct node *temp;
-    temp = (struct node *)malloc(sizeof(node));
+    temp = (struct node *)malloc(sizeof(struct node));
     temp->burst = burst;
     temp->arrival = arrival;
     temp->priority = priority;
@@ -223,27 +233,9 @@ struct node *createNode(int burst, int arrival, int priority)
     return temp;
 }
 
-void sort(node **head)
+int length(struct node *head)
 {
-    node *last = (*head);
-    node *first = (*head)->next;
-    while (first != NULL)
-    {
-        if (first->arrival < last->arrival)
-        {
-            last->next = first->next;
-            first->next = (*head);
-            (*head) = first;
-            first = last;
-        }
-        else
-            last = first;
-        first = first->next;
-    }
-}
-int length(node *head)
-{
-    node *temp = head;
+    struct node *temp = head;
     int len = 0;
     while (temp != NULL)
     {
@@ -253,18 +245,18 @@ int length(node *head)
     return len;
 }
 
-node *sort(node *head)
+struct node *sort(struct node *head)
 {
-    node *i = head;
+    struct node *i = head;
     int len = length(head);
     int itr = 0;
     while (itr < len)
     {
-        node *j = head;
-        node *prev = head;
+        struct node *j = head;
+        struct node *prev = head;
         while (j->next)
         {
-            node *temp = j->next;
+            struct node *temp = j->next;
             if (j->arrival > temp->arrival)
             {
                 if (j == head)
@@ -289,4 +281,35 @@ node *sort(node *head)
         ++itr;
     }
     return head;
+}
+
+void fcfs(struct node *head)
+{
+    if (!head)
+    {
+        cout << "Linked list is empty.\n";
+        return;
+    }
+    node *current = head;
+    int currentTime = 0;
+    float totalWaitingTime = 0.0;
+
+    cout << "FCFS Schedule:\n";
+    while (current)
+    {
+        if (current->arrival > currentTime)
+        {
+            currentTime = current->arrival;
+        }
+        int waitingTime = currentTime - current->arrival;
+        totalWaitingTime += waitingTime;
+
+        cout << "Process with Burst Time " << current->burst << " starts at time " << currentTime
+             << " (Waiting Time: " << waitingTime << ")\n";
+        currentTime += current->burst;
+        current = current->next;
+    }
+    float averageWaitingTime = totalWaitingTime / length(head);
+    cout << "Average Waiting Time: " << averageWaitingTime << "\n";
+    menu(head);
 }
