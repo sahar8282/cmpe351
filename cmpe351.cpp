@@ -152,8 +152,6 @@ void menu(struct node *process)
                 sjfpre(process);
             }
 
-            sjf(process);
-
             break;
         case '3':
             priority();
@@ -202,35 +200,17 @@ void menu(struct node *process)
         break;
     }
 }
-void sjfnonpre(struct node *head)
+struct node *createNode(int burst, int arrival, int priority)
 {
-    if (!head) {
-        cout << "No processes in the list." << endl;
-        return;
-    }
-
-    Node* current = head;
-    int currentTime = 0;
-
-    while (current) {
-        current->waitingtime = max(0, currentTime - current->arrival);
-        currentTime += current->burst;
-        current = current->next;
-        
-   }
+    struct node *temp;
+    temp = (struct node *)malloc(sizeof(struct node));
+    temp->burst = burst;
+    temp->arrival = arrival;
+    temp->priority = priority;
+    temp->waitingtime=0;
+    temp->next = NULL;
+    return temp;
 }
-void priority()
-{
-}
-void rr()
-{
-}
-void result()
-{
-    ofstream outputfile(outputFilename);
-   
-}
-
 struct node *insertBack(struct node *header, int burst, int arrival, int priority)
 {
     struct node *temp = createNode(burst, arrival, priority);
@@ -246,19 +226,6 @@ struct node *insertBack(struct node *header, int burst, int arrival, int priorit
     headertemp->next = temp;
     return header;
 }
-
-struct node *createNode(int burst, int arrival, int priority)
-{
-    struct node *temp;
-    temp = (struct node *)malloc(sizeof(struct node));
-    temp->burst = burst;
-    temp->arrival = arrival;
-    temp->priority = priority;
-    temp->waitingtime=0;
-    temp->next = NULL;
-    return temp;
-}
-
 int length(struct node *head)
 {
     struct node *temp = head;
@@ -270,7 +237,6 @@ int length(struct node *head)
     }
     return len;
 }
-
 struct node *sort(struct node *head)
 {
     struct node *i = head;
@@ -308,7 +274,40 @@ struct node *sort(struct node *head)
     }
     return head;
 }
+void sjfnonpre(struct node *head)
+{   int totalWaitingTime=0;
+    float averageWaitingTime;
+    if (!head) {
+        cout << "No processes in the list." << endl;
+        return;
+    }
 
+    node* current = head;
+    int currentTime = 0;
+
+    while (current) {
+        current->waitingtime = max(0, currentTime - current->arrival);
+        currentTime += current->burst;
+        current = current->next;
+         cout << "Process with Burst Time " << current->burst << " starts at time " << currentTime
+             << " (Waiting Time: " << current->waitingtime << ")\n";
+        totalWaitingTime+=current->waitingtime;
+   }
+
+    averageWaitingTime=totalWaitingTime/length(head);
+    cout << "Average Waiting Time: " << averageWaitingTime << "\n";
+}
+void priority()
+{
+}
+void rr()
+{
+}
+void result()
+{
+    ofstream outputfile(outputFilename);
+   
+}
 void fcfs(struct node *head)
 {  
     //need edit
