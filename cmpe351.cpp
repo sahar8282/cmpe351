@@ -149,7 +149,7 @@ void menu(struct node *process)
                 sjfnonpre(process);
             else
             {
-                sjfpre(process);
+                //sjfpre(process);
             }
 
             break;
@@ -274,9 +274,20 @@ struct node *sort(struct node *head)
     }
     return head;
 }
+void freeList(Process* head) {
+    Process* current = head;
+    Process* next;
+
+    while (current != NULL) {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+}
 void sjfnonpre(struct node *head)
 {   int totalWaitingTime=0;
     float averageWaitingTime;
+
     if (!head) {
         cout << "No processes in the list." << endl;
         return;
@@ -293,7 +304,7 @@ void sjfnonpre(struct node *head)
              << " (Waiting Time: " << current->waitingtime << ")\n";
         totalWaitingTime+=current->waitingtime;
    }
-
+    freeList(current);
     averageWaitingTime=totalWaitingTime/length(head);
     cout << "Average Waiting Time: " << averageWaitingTime << "\n";
 }
