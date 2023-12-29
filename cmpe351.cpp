@@ -6,7 +6,8 @@
 using namespace std;
 void menu(struct node *);
 void fcfs(struct node *);
-void sjf(struct node *);
+void sjfnonpre(struct node *);
+void sjfpre(struct node *);
 void priority();
 void rr();
 void result();
@@ -144,6 +145,13 @@ void menu(struct node *process)
             break;
 
         case '2':
+        if (!preemtive)
+                sjfnonpre(process);
+            else
+            {
+                sjfpre(process);
+            }
+
             sjf(process);
 
             break;
@@ -194,9 +202,22 @@ void menu(struct node *process)
         break;
     }
 }
-void sjf(struct node *head)
+void sjfnonpre(struct node *head)
 {
-    
+    if (!head) {
+        cout << "No processes in the list." << endl;
+        return;
+    }
+
+    Node* current = head;
+    int currentTime = 0;
+
+    while (current) {
+        current->waitingtime = max(0, currentTime - current->arrival);
+        currentTime += current->burst;
+        current = current->next;
+        
+   }
 }
 void priority()
 {
@@ -289,7 +310,9 @@ struct node *sort(struct node *head)
 }
 
 void fcfs(struct node *head)
-{  //need edit
+{  
+    //need edit
+
      head=sort(head);
     if (!head)
     {
