@@ -6,7 +6,7 @@
 using namespace std;
 void menu(struct node *);
 void fcfs(struct node *);
-void sjf();
+void sjf(struct node *);
 void priority();
 void rr();
 void result();
@@ -16,7 +16,7 @@ struct node *createNode(int, int, int);
 
 struct node
 {
-    int burst, arrival, priority;
+    int burst, arrival, priority,waitingtime;
     struct node *next;
 };
 string inputFilename;
@@ -144,7 +144,7 @@ void menu(struct node *process)
             break;
 
         case '2':
-            sjf();
+            sjf(process);
 
             break;
         case '3':
@@ -194,8 +194,9 @@ void menu(struct node *process)
         break;
     }
 }
-void sjf()
+void sjf(struct node *head)
 {
+    
 }
 void priority()
 {
@@ -220,7 +221,7 @@ struct node *insertBack(struct node *header, int burst, int arrival, int priorit
     }
     headertemp = header;
     while (headertemp->next != NULL)
-        headertemp = headertemp->next;
+    headertemp = headertemp->next;
     headertemp->next = temp;
     return header;
 }
@@ -232,6 +233,7 @@ struct node *createNode(int burst, int arrival, int priority)
     temp->burst = burst;
     temp->arrival = arrival;
     temp->priority = priority;
+    temp->waitingtime=0;
     temp->next = NULL;
     return temp;
 }
@@ -287,7 +289,8 @@ struct node *sort(struct node *head)
 }
 
 void fcfs(struct node *head)
-{
+{  //need edit
+     head=sort(head);
     if (!head)
     {
         cout << "Linked list is empty.\n";
@@ -300,15 +303,16 @@ void fcfs(struct node *head)
     cout << "FCFS Schedule:\n";
     while (current)
     {
+        int i=1;
         if (current->arrival > currentTime)
         {
             currentTime = current->arrival;
         }
-        int waitingTime = currentTime - current->arrival;
-        totalWaitingTime += waitingTime;
-
+         current->waitingtime=currentTime - current->arrival;
+         totalWaitingTime += current->waitingtime;
+        
         cout << "Process with Burst Time " << current->burst << " starts at time " << currentTime
-             << " (Waiting Time: " << waitingTime << ")\n";
+             << " (Waiting Time: " << current->waitingtime << ")\n";
         currentTime += current->burst;
         current = current->next;
     }
