@@ -11,17 +11,22 @@ void sjfpre(struct node *);
 void priority();
 void rr();
 void result();
-struct node *sort(struct node *);
+//void arrivalsort(struct node *);
+struct node *burstsort(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
-
+void display(struct node *);
+void arrivalsort(node*&);
 struct node
 {
-    int burst, arrival, priority,waitingtime;
+    int burst, arrival, priority, waitingtime;
     struct node *next;
 };
 string inputFilename;
 string outputFilename;
+
+
+
 int main(int argc, char *argv[])
 {
     struct node *process = NULL;
@@ -32,8 +37,6 @@ int main(int argc, char *argv[])
              << "command should be like this: ./program_name -f inputfile -o outputfile" << endl;
         return 1;
     }
-
- 
 
     for (int i = 1; i < argc; ++i)
     {
@@ -91,13 +94,22 @@ int main(int argc, char *argv[])
         getline(iss2, num1, delimiter);
         getline(iss2, num2, delimiter);
         getline(iss2, num3, delimiter);
-        cout << "Number 1: " << stoi(num1) << endl;
-        cout << "Number 2: " << stoi(num2) << endl;
-        cout << "Number 3: " << stoi(num3) << endl;
+        cout << "burst:    " << stoi(num1) << endl;
+        cout << "arrival:  " << stoi(num2) << endl;
+        cout << "priority: " << stoi(num3) << endl;
         cout << endl;
 
         process = insertBack(process, stoi(num1), stoi(num2), stoi(num3));
     }
+
+    // this is just a test
+    // clear this part
+    cout << "normal: " << endl;
+    display(process);
+    cout << endl
+         << "sorted: " << endl;
+    arrivalsort(process);
+    display(process);
 
     menu(process);
     return 0;
@@ -108,7 +120,8 @@ void menu(struct node *process)
     char preemtivechoose;
     char methodchoice;
     char menuchoose;
-    cout <<endl<< "*************************************" << endl;
+    cout << endl
+         << "*************************************" << endl;
     cout << "CPU Scheduler Simulator" << endl;
     cout << "1) choosing Scheduling Method " << endl
          << "2) choosing Preemptive Mode" << endl
@@ -145,11 +158,11 @@ void menu(struct node *process)
             break;
 
         case '2':
-        if (!preemtive)
+            if (!preemtive)
                 sjfnonpre(process);
             else
             {
-                //sjfpre(process);
+                // sjfpre(process);
             }
 
             break;
@@ -207,7 +220,7 @@ struct node *createNode(int burst, int arrival, int priority)
     temp->burst = burst;
     temp->arrival = arrival;
     temp->priority = priority;
-    temp->waitingtime=0;
+    temp->waitingtime = 0;
     temp->next = NULL;
     return temp;
 }
@@ -222,7 +235,7 @@ struct node *insertBack(struct node *header, int burst, int arrival, int priorit
     }
     headertemp = header;
     while (headertemp->next != NULL)
-    headertemp = headertemp->next;
+        headertemp = headertemp->next;
     headertemp->next = temp;
     return header;
 }
@@ -237,9 +250,9 @@ int length(struct node *head)
     }
     return len;
 }
-struct node *sort(struct node *head)
+/*void arrivalsort(struct node *head)
 {
-    struct node *i = head;
+    
     int len = length(head);
     int itr = 0;
     while (itr < len)
@@ -272,40 +285,100 @@ struct node *sort(struct node *head)
         }
         ++itr;
     }
+    return;
+}*/
+
+void arrivalsort(node*& head) {
+    if (head == nullptr || head->next == nullptr) {
+        return;  // No need to sort
+    }
+
+    bool swapped;
+    node* current;
+    node* last = nullptr;
+
+    do {
+        swapped = false;
+        current = head;
+
+        while (current->next != last) {
+            if (current->arrival > current->next->arrival) {
+                // Swap the nodes
+               swap(current->arrival, current->next->arrival);
+               swap(current->burst, current->next->burst);
+               swap(current->priority, current->next->priority);
+               swap(current->waitingtime, current->next->waitingtime);
+                swapped = true;
+            }
+            current = current->next;
+        }
+
+        last = current;
+
+    } while (swapped);
+}
+struct node *burstsort(struct node *head)
+{
+
+    struct node *i = head;
+    int len = length(head);
+    int itr = 0;
+    while (itr < len)
+    {
+        struct node *j = head;
+        struct node *prev = head;
+        while (j->next)
+        {
+            struct node *temp = j->next;
+            if (j->burst > temp->burst)
+            {
+                if (j == head)
+                {
+                    j->next = temp->next;
+                    temp->next = j;
+                    prev = temp;
+                    head = prev;
+                }
+                else
+                {
+                    j->next = temp->next;
+                    temp->next = j;
+                    prev->next = temp;
+                    prev = temp;
+                }
+                continue;
+            }
+            prev = j;
+            j = j->next;
+        }
+        ++itr;
+    }
     return head;
 }
-void freeList(Process* head) {
-    Process* current = head;
-    Process* next;
-
-    while (current != NULL) {
-        next = current->next;
-        free(current);
-        current = next;
-    }
-}
 void sjfnonpre(struct node *head)
-{   int totalWaitingTime=0;
+{
+    int totalWaitingTime = 0;
     float averageWaitingTime;
 
-    if (!head) {
+    if (!head)
+    {
         cout << "No processes in the list." << endl;
         return;
     }
 
-    node* current = head;
+    node *current = head;
     int currentTime = 0;
 
-    while (current) {
+    while (current)
+    {
         current->waitingtime = max(0, currentTime - current->arrival);
         currentTime += current->burst;
         current = current->next;
-         cout << "Process with Burst Time " << current->burst << " starts at time " << currentTime
+        cout << "Process with Burst Time " << current->burst << " starts at time " << currentTime
              << " (Waiting Time: " << current->waitingtime << ")\n";
-        totalWaitingTime+=current->waitingtime;
-   }
-    freeList(current);
-    averageWaitingTime=totalWaitingTime/length(head);
+        totalWaitingTime += current->waitingtime;
+    }
+    averageWaitingTime = totalWaitingTime / length(head);
     cout << "Average Waiting Time: " << averageWaitingTime << "\n";
 }
 void priority()
@@ -317,39 +390,53 @@ void rr()
 void result()
 {
     ofstream outputfile(outputFilename);
-   
 }
 void fcfs(struct node *head)
-{  
-    //need edit
+{
+    // need edit
 
-     head=sort(head);
+    arrivalsort(head);
     if (!head)
     {
         cout << "Linked list is empty.\n";
         return;
     }
     node *current = head;
-    int currentTime = 0;
+    int timer = 0;
     float totalWaitingTime = 0.0;
 
     cout << "FCFS Schedule:\n";
     while (current)
     {
-        int i=1;
-        if (current->arrival > currentTime)
+        int i = 1;
+        if (current->arrival > timer)
         {
-            currentTime = current->arrival;
+            timer = current->arrival;
         }
-         current->waitingtime=currentTime - current->arrival;
-         totalWaitingTime += current->waitingtime;
-        
-        cout << "Process with Burst Time " << current->burst << " starts at time " << currentTime
+        current->waitingtime = timer - current->arrival;
+        totalWaitingTime += current->waitingtime;
+
+        cout << "Process with Burst Time " << current->burst << " starts at time " << timer
              << " (Waiting Time: " << current->waitingtime << ")\n";
-        currentTime += current->burst;
+        timer += current->burst;
         current = current->next;
     }
     float averageWaitingTime = totalWaitingTime / length(head);
     cout << "Average Waiting Time: " << averageWaitingTime << "\n";
     menu(head);
+}
+void display(struct node *h)
+{
+
+    if (h == NULL)
+        cout << "empty";
+
+    struct node *t = h;
+    while (t != NULL)
+        {
+            cout << t->burst << "," << t->arrival << "," << t->priority << endl;
+            t = t->next;
+
+        }
+                cout<< endl;
 }
