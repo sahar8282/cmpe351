@@ -9,14 +9,13 @@ void fcfs(struct node *);
 void sjfnonpre(struct node *);
 void sjfpre(struct node *);
 void priority();
-void rr();
-void result();
-//void arrivalsort(struct node *);
+void rrpre();
+void result(struct node *);
 struct node *burstsort(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
 void display(struct node *);
-void arrivalsort(node*&);
+void arrivalsort(node *&);
 struct node
 {
     int burst, arrival, priority, waitingtime;
@@ -24,8 +23,7 @@ struct node
 };
 string inputFilename;
 string outputFilename;
-
-
+string smethod;
 
 int main(int argc, char *argv[])
 {
@@ -171,7 +169,7 @@ void menu(struct node *process)
 
             break;
         case '4':
-            rr();
+            rrpre();
 
             break;
         default:
@@ -196,12 +194,12 @@ void menu(struct node *process)
         break;
 
     case '3':
-        result();
+        result(process);
 
         break;
 
     case '4':
-        result();
+        result(process);
         exit(1);
 
         break;
@@ -250,64 +248,31 @@ int length(struct node *head)
     }
     return len;
 }
-/*void arrivalsort(struct node *head)
+void arrivalsort(node *&head)
 {
-    
-    int len = length(head);
-    int itr = 0;
-    while (itr < len)
+    if (head == nullptr || head->next == nullptr)
     {
-        struct node *j = head;
-        struct node *prev = head;
-        while (j->next)
-        {
-            struct node *temp = j->next;
-            if (j->arrival > temp->arrival)
-            {
-                if (j == head)
-                {
-                    j->next = temp->next;
-                    temp->next = j;
-                    prev = temp;
-                    head = prev;
-                }
-                else
-                {
-                    j->next = temp->next;
-                    temp->next = j;
-                    prev->next = temp;
-                    prev = temp;
-                }
-                continue;
-            }
-            prev = j;
-            j = j->next;
-        }
-        ++itr;
-    }
-    return;
-}*/
-
-void arrivalsort(node*& head) {
-    if (head == nullptr || head->next == nullptr) {
-        return;  // No need to sort
+        return; // No need to sort
     }
 
     bool swapped;
-    node* current;
-    node* last = nullptr;
+    node *current;
+    node *last = nullptr;
 
-    do {
+    do
+    {
         swapped = false;
         current = head;
 
-        while (current->next != last) {
-            if (current->arrival > current->next->arrival) {
+        while (current->next != last)
+        {
+            if (current->arrival > current->next->arrival)
+            {
                 // Swap the nodes
-               swap(current->arrival, current->next->arrival);
-               swap(current->burst, current->next->burst);
-               swap(current->priority, current->next->priority);
-               swap(current->waitingtime, current->next->waitingtime);
+                swap(current->arrival, current->next->arrival);
+                swap(current->burst, current->next->burst);
+                swap(current->priority, current->next->priority);
+                swap(current->waitingtime, current->next->waitingtime);
                 swapped = true;
             }
             current = current->next;
@@ -357,6 +322,7 @@ struct node *burstsort(struct node *head)
 }
 void sjfnonpre(struct node *head)
 {
+    smethod = "shortest job first _ non preemtive";
     int totalWaitingTime = 0;
     float averageWaitingTime;
 
@@ -383,17 +349,17 @@ void sjfnonpre(struct node *head)
 }
 void priority()
 {
+    smethod = "priority scheduling _ preemtive";
 }
-void rr()
+void rrpre()
 {
-}
-void result()
-{
-    ofstream outputfile(outputFilename);
+    smethod = "round robbin _ preemtive";
 }
 void fcfs(struct node *head)
 {
     // need edit
+
+    smethod = "first come first served";
 
     arrivalsort(head);
     if (!head)
@@ -404,8 +370,6 @@ void fcfs(struct node *head)
     node *current = head;
     int timer = 0;
     float totalWaitingTime = 0.0;
-
-    cout << "FCFS Schedule:\n";
     while (current)
     {
         int i = 1;
@@ -415,14 +379,9 @@ void fcfs(struct node *head)
         }
         current->waitingtime = timer - current->arrival;
         totalWaitingTime += current->waitingtime;
-
-        cout << "Process with Burst Time " << current->burst << " starts at time " << timer
-             << " (Waiting Time: " << current->waitingtime << ")\n";
         timer += current->burst;
         current = current->next;
     }
-    float averageWaitingTime = totalWaitingTime / length(head);
-    cout << "Average Waiting Time: " << averageWaitingTime << "\n";
     menu(head);
 }
 void display(struct node *h)
@@ -433,10 +392,40 @@ void display(struct node *h)
 
     struct node *t = h;
     while (t != NULL)
-        {
-            cout << t->burst << "," << t->arrival << "," << t->priority << endl;
-            t = t->next;
+    {
+        cout << t->burst << "," << t->arrival << "," << t->priority << endl;
+        t = t->next;
+    }
+    cout << endl;
+}
+void result(struct node *process)
+{
+    struct node *temp = process;
+    float totalWaitingTime = 0.0;
 
-        }
-                cout<< endl;
+    ofstream outputfile(outputFilename);
+
+    if (!outputfile.is_open())
+    {
+        cerr << "Error opening the file!" << endl;
+        return;
+    }
+
+    cout << "Scheduling method : " << smethod << endl;
+    outputfile << "Scheduling method : " << smethod << endl;
+    for (int i = 0; i < length(process); i++)
+    {
+        cout << "p" << i + 1 << " : "
+             << "waiting time = " << temp->waitingtime << endl;
+
+               outputfile<< "p" << i + 1 << " : "
+             << "waiting time = " << temp->waitingtime << endl;
+
+        totalWaitingTime += temp->waitingtime;
+        temp = temp->next;
+    }
+    float averageWaitingTime = totalWaitingTime / length(process);
+    cout << "Average Waiting Time: " << averageWaitingTime << "\n";
+    outputfile << "Average Waiting Time: " << averageWaitingTime << "\n";
+    menu(process);
 }
