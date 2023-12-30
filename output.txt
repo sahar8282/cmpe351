@@ -1,0 +1,4 @@
+Scheduling method : 
+p1 : waiting time = 0
+p2 : waiting time = 0
+p3 : waiting time = 0

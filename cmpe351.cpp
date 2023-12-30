@@ -11,11 +11,11 @@ void sjfpre(struct node *);
 void priority();
 void rrpre();
 void result(struct node *);
-struct node *burstsort(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
 void display(struct node *);
 void arrivalsort(node *&);
+void burstsort(node *&);
 struct node
 {
     int burst, arrival, priority, waitingtime;
@@ -195,7 +195,7 @@ void menu(struct node *process)
 
     case '3':
         result(process);
-
+        menu(process);
         break;
 
     case '4':
@@ -282,49 +282,44 @@ void arrivalsort(node *&head)
 
     } while (swapped);
 }
-struct node *burstsort(struct node *head)
+void burstsort(node *&head)
 {
-
-    struct node *i = head;
-    int len = length(head);
-    int itr = 0;
-    while (itr < len)
+    if (head == nullptr || head->next == nullptr)
     {
-        struct node *j = head;
-        struct node *prev = head;
-        while (j->next)
-        {
-            struct node *temp = j->next;
-            if (j->burst > temp->burst)
-            {
-                if (j == head)
-                {
-                    j->next = temp->next;
-                    temp->next = j;
-                    prev = temp;
-                    head = prev;
-                }
-                else
-                {
-                    j->next = temp->next;
-                    temp->next = j;
-                    prev->next = temp;
-                    prev = temp;
-                }
-                continue;
-            }
-            prev = j;
-            j = j->next;
-        }
-        ++itr;
+        return; // No need to sort
     }
-    return head;
+
+    bool swapped;
+    node *current;
+    node *last = nullptr;
+
+    do
+    {
+        swapped = false;
+        current = head;
+
+        while (current->next != last)
+        {
+            if (current->burst > current->next->burst)
+            {
+                // Swap the nodes
+                swap(current->arrival, current->next->arrival);
+                swap(current->burst, current->next->burst);
+                swap(current->priority, current->next->priority);
+                swap(current->waitingtime, current->next->waitingtime);
+                swapped = true;
+            }
+            current = current->next;
+        }
+
+        last = current;
+
+    } while (swapped);
 }
 void sjfnonpre(struct node *head)
 {
+    burstsort(head);
     smethod = "shortest job first _ non preemtive";
-    int totalWaitingTime = 0;
-    float averageWaitingTime;
 
     if (!head)
     {
@@ -340,12 +335,8 @@ void sjfnonpre(struct node *head)
         current->waitingtime = max(0, currentTime - current->arrival);
         currentTime += current->burst;
         current = current->next;
-        cout << "Process with Burst Time " << current->burst << " starts at time " << currentTime
-             << " (Waiting Time: " << current->waitingtime << ")\n";
-        totalWaitingTime += current->waitingtime;
     }
-    averageWaitingTime = totalWaitingTime / length(head);
-    cout << "Average Waiting Time: " << averageWaitingTime << "\n";
+    
 }
 void priority()
 {
@@ -426,6 +417,6 @@ void result(struct node *process)
     }
     float averageWaitingTime = totalWaitingTime / length(process);
     cout << "Average Waiting Time: " << averageWaitingTime << "\n";
-    outputfile << "Average Waiting Time: " << averageWaitingTime << "\n";
-    menu(process);
+    outputfile<< "Average Waiting Time: " << averageWaitingTime << "\n";
+    
 }
