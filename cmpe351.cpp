@@ -267,7 +267,6 @@ void arrivalsort(node *&head)
     bool swapped;
     node *current;
     node *last = nullptr;
-
     do
     {
         swapped = false;
