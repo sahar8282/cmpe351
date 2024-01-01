@@ -8,7 +8,7 @@ void menu(struct node *);
 void fcfs(struct node *);
 void sjfnonpre(struct node *);
 void sjfpre(struct node *);
-void priority(struct node *);
+void prioritynonpre(struct node *);
 void rrpre(struct node *);
 void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
@@ -16,6 +16,7 @@ struct node *createNode(int, int, int);
 void display(struct node *);
 void arrivalsort(node *&);
 void burstsort(node *&);
+void prioritysort(node *&);
 struct node
 {
     int burst, arrival, priority, waitingtime;
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
     display(process);
     cout << endl
          << "sorted: " << endl;
-    burstsort(process);
+    arrivalsort(process);
     display(process);
 
     menu(process);
@@ -165,7 +166,7 @@ void menu(struct node *process)
 
             break;
         case '3':
-            //  priority(process);
+            prioritynonpre(process);
 
             break;
         case '4':
@@ -324,6 +325,40 @@ void burstsort(node *&head)
 
     } while (swapped);
 }
+void prioritysort(node *&head)
+{
+    if (head == nullptr || head->next == nullptr)
+    {
+        return; // No need to sort
+    }
+
+    bool swapped;
+    node *current;
+    node *last = nullptr;
+
+    do
+    {
+        swapped = false;
+        current = head;
+
+        while (current->next != last)
+        {
+            if (current->priority > current->next->priority)
+            {
+                // Swap the nodes
+                swap(current->arrival, current->next->arrival);
+                swap(current->burst, current->next->burst);
+                swap(current->priority, current->next->priority);
+                swap(current->waitingtime, current->next->waitingtime);
+                swapped = true;
+            }
+            current = current->next;
+        }
+
+        last = current;
+
+    } while (swapped);
+}
 void sjfnonpre(struct node *process)
 {
     burstsort(process);
@@ -353,7 +388,7 @@ void sjfnonpre(struct node *process)
 }
 void sjfpre(struct node *process)
 {
-    burstsort(process);
+    arrivalsort(process);   
     if (!process)
     {
         cout << "there is no process!" << endl;
@@ -367,7 +402,7 @@ void sjfpre(struct node *process)
     {
         if (current->arrival> timer)
         {
-            
+
             timer = current->arrival;
         }
 
@@ -406,7 +441,9 @@ void sjfpre(struct node *process)
 void priority()
 {
     smethod = "priority scheduling _ preemtive";
+
 }
+
 void rrpre()
 {
     smethod = "round robbin _ preemtive";
