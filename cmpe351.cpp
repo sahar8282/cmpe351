@@ -8,8 +8,8 @@ void menu(struct node *);
 void fcfs(struct node *);
 void sjfnonpre(struct node *);
 void sjfpre(struct node *);
-void priority();
-void rrpre();
+void priority(struct node *);
+void rrpre(struct node *);
 void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
@@ -198,10 +198,18 @@ void menu(struct node *process)
         menu(process);
         break;
 
-    case '4':
+    case '4': fcfs(process);
         result(process);
-        exit(1);
+        sjfnonpre(process);
+        result(process);
+        sjfpre(process);
+        result(process);
+        priority(process);
+        result(process);
+        rrpre(process);
+        result(process);
 
+        exit(1);
         break;
 
     default:
@@ -348,7 +356,7 @@ void rrpre()
 }
 void fcfs(struct node *head)
 {
-    // need edit
+
 
     smethod = "first come first served";
 
