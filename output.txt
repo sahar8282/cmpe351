@@ -1,5 +1,6 @@
-Scheduling method : shortest job first _ non preemtive
+Scheduling method : 
 p1 : waiting time = 0
-p2 : waiting time = 0
-p3 : waiting time = 4
-Average Waiting Time: 1.33333
+p2 : waiting time = 2
+p3 : waiting time = 10
+p4 : waiting time = 16
+Average Waiting Time: 7
