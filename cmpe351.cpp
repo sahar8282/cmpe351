@@ -160,16 +160,16 @@ void menu(struct node *process)
                 sjfnonpre(process);
             else
             {
-                // sjfpre(process);
+                sjfpre(process);
             }
 
             break;
         case '3':
-          //  priority(process);
+            //  priority(process);
 
             break;
         case '4':
-          //  rrpre(process);
+            //  rrpre(process);
 
             break;
         default:
@@ -340,17 +340,67 @@ void sjfnonpre(struct node *process)
 
     while (current)
     {
-         if (current->arrival > timer)
+        if (current->arrival > timer)
         {
             timer = current->arrival;
         }
 
-        current->waitingtime =timer - current->arrival;
+        current->waitingtime = timer - current->arrival;
         timer += current->burst;
         current = current->next;
     }
     menu(process);
-    
+}
+void sjfpre(struct node *process)
+{
+    burstsort(process);
+    if (!process)
+    {
+        cout << "there is no process!" << endl;
+        return;
+    }
+
+    node *current = process;
+    int timer = 0;
+
+    while (current)
+    {
+        if (current->arrival> timer)
+        {
+            timer = current->arrival;
+        }
+
+        node *shortestJob = current;
+        node *temp = current->next;
+
+        while (temp && temp->arrival <= timer)
+        {
+            if (temp->burst < shortestJob->burst)
+            {
+                shortestJob = temp;
+            }
+            temp = temp->next;
+        }
+
+        if (shortestJob == current)
+        {
+            timer += current->burst;
+            current->waitingtime = timer - current->arrival - current->burst;
+            current = current->next;
+        }
+        else
+        {
+            node *temp = current;
+            while (temp->next != shortestJob)
+            {
+                temp = temp->next;
+            }
+            temp->next = shortestJob->next;
+            shortestJob->next = current;
+            current = shortestJob;
+        }
+    }
+    menu(process);
 }
 void priority()
 {
@@ -362,7 +412,6 @@ void rrpre()
 }
 void fcfs(struct node *head)
 {
-
 
     smethod = "first come first served";
 
@@ -423,14 +472,13 @@ void result(struct node *process)
         cout << "p" << i + 1 << " : "
              << "waiting time = " << temp->waitingtime << endl;
 
-               outputfile<< "p" << i + 1 << " : "
-             << "waiting time = " << temp->waitingtime << endl;
+        outputfile << "p" << i + 1 << " : "
+                   << "waiting time = " << temp->waitingtime << endl;
 
         totalWaitingTime += temp->waitingtime;
         temp = temp->next;
     }
     float averageWaitingTime = totalWaitingTime / length(process);
     cout << "Average Waiting Time: " << averageWaitingTime << "\n";
-    outputfile<< "Average Waiting Time: " << averageWaitingTime << "\n";
-    
+    outputfile << "Average Waiting Time: " << averageWaitingTime << "\n";
 }
