@@ -354,7 +354,6 @@ void prioritysort(node *&head)
             }
             current = current->next;
         }
-
         last = current;
 
     } while (swapped);
