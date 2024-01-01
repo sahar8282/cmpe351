@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     display(process);
     cout << endl
          << "sorted: " << endl;
-    arrivalsort(process);
+    burstsort(process);
     display(process);
 
     menu(process);
@@ -165,11 +165,11 @@ void menu(struct node *process)
 
             break;
         case '3':
-            priority();
+          //  priority(process);
 
             break;
         case '4':
-            rrpre();
+          //  rrpre(process);
 
             break;
         default:
@@ -198,7 +198,7 @@ void menu(struct node *process)
         menu(process);
         break;
 
-    case '4': fcfs(process);
+    case '4': /*fcfs(process);
         result(process);
         sjfnonpre(process);
         result(process);
@@ -208,7 +208,7 @@ void menu(struct node *process)
         result(process);
         rrpre(process);
         result(process);
-
+*/
         exit(1);
         break;
 
@@ -324,26 +324,32 @@ void burstsort(node *&head)
 
     } while (swapped);
 }
-void sjfnonpre(struct node *head)
+void sjfnonpre(struct node *process)
 {
-    burstsort(head);
+    burstsort(process);
     smethod = "shortest job first _ non preemtive";
 
-    if (!head)
+    if (!process)
     {
         cout << "No processes in the list." << endl;
         return;
     }
 
-    node *current = head;
-    int currentTime = 0;
+    node *current = process;
+    int timer = 0;
 
     while (current)
     {
-        current->waitingtime = max(0, currentTime - current->arrival);
-        currentTime += current->burst;
+         if (current->arrival > timer)
+        {
+            timer = current->arrival;
+        }
+
+        current->waitingtime =timer - current->arrival;
+        timer += current->burst;
         current = current->next;
     }
+    menu(process);
     
 }
 void priority()
