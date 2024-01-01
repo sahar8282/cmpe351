@@ -443,7 +443,6 @@ void priority()
     smethod = "priority scheduling _ preemtive";
 
 }
-
 void rrpre()
 {
     smethod = "round robbin _ preemtive";
