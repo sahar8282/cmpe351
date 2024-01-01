@@ -367,6 +367,7 @@ void sjfpre(struct node *process)
     {
         if (current->arrival> timer)
         {
+            
             timer = current->arrival;
         }
 
