@@ -388,7 +388,7 @@ void sjfnonpre(struct node *process)
 }
 void sjfpre(struct node *process)
 {
-    arrivalsort(process);   
+    arrivalsort(process);
     if (!process)
     {
         cout << "there is no process!" << endl;
@@ -400,7 +400,7 @@ void sjfpre(struct node *process)
 
     while (current)
     {
-        if (current->arrival> timer)
+        if (current->arrival > timer)
         {
 
             timer = current->arrival;
@@ -437,11 +437,6 @@ void sjfpre(struct node *process)
         }
     }
     menu(process);
-}
-void priority()
-{
-    smethod = "priority scheduling _ preemtive";
-
 }
 void rrpre()
 {
