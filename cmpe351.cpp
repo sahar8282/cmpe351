@@ -518,7 +518,6 @@ void prioritynonpre(node *head)
                
             }
             
-
         }else
         select->waitingtime=timer-select->arrival;
         timer=timer+select->burst;
