@@ -9,6 +9,7 @@ void fcfs(struct node *);
 void sjfnonpre(struct node *);
 void sjfpre(struct node *);
 void prioritynonpre(struct node *);
+void prioritypre(struct node *);
 void rrpre(struct node *);
 void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
@@ -20,12 +21,13 @@ void prioritysort(node *&);
 struct node
 {
     int burst, arrival, priority, waitingtime;
+    int pid;
     struct node *next;
 };
 string inputFilename;
 string outputFilename;
 string smethod;
-
+int id=1;
 int main(int argc, char *argv[])
 {
     struct node *process = NULL;
@@ -81,7 +83,7 @@ int main(int argc, char *argv[])
     b << inputFile.rdbuf();
     inputFile.close();
     string fileContents = b.str();
-    cout << fileContents << endl;
+    
 
     istringstream iss(fileContents);
     string line;
@@ -93,22 +95,22 @@ int main(int argc, char *argv[])
         getline(iss2, num1, delimiter);
         getline(iss2, num2, delimiter);
         getline(iss2, num3, delimiter);
-        cout << "burst:    " << stoi(num1) << endl;
-        cout << "arrival:  " << stoi(num2) << endl;
-        cout << "priority: " << stoi(num3) << endl;
-        cout << endl;
+       
 
         process = insertBack(process, stoi(num1), stoi(num2), stoi(num3));
     }
 
     // this is just a test
     // clear this part
+    cout << fileContents << endl;
     cout << "normal: " << endl;
     display(process);
     cout << endl
          << "sorted: " << endl;
     arrivalsort(process);
     display(process);
+    //end of test
+
 
     menu(process);
     return 0;
@@ -165,8 +167,14 @@ void menu(struct node *process)
             }
 
             break;
-        case '3':
-            prioritynonpre(process);
+        case '3': 
+        if (!preemtive)
+                 prioritynonpre(process);
+            else
+            {
+               // prioritypre(process);
+            }
+           
 
             break;
         case '4':
@@ -229,6 +237,8 @@ struct node *createNode(int burst, int arrival, int priority)
     temp->priority = priority;
     temp->waitingtime = 0;
     temp->next = NULL;
+    temp->pid=id;
+    id++;
     return temp;
 }
 struct node *insertBack(struct node *header, int burst, int arrival, int priority)
@@ -436,6 +446,27 @@ void sjfpre(struct node *process)
     }
     menu(process);
 }
+void prioritynonpre(node* process) {
+    arrivalsort(process);
+    node* current = process;
+    int timer = 0;
+    while (current != nullptr) {
+        
+        if (current->arrival <= timer) {
+            current->waitingtime = timer - current->arrival;
+
+            // Update current time
+            timer += current->burst;
+
+            // Move to the next process
+            current = current->next;
+        } else {
+            // If the process hasn't arrived, wait for it
+            timer++;
+        }
+    }
+    menu(process);
+}
 void rrpre()
 {
     smethod = "round robbin _ preemtive";
@@ -477,7 +508,7 @@ void display(struct node *h)
     struct node *t = h;
     while (t != NULL)
     {
-        cout << t->burst << "," << t->arrival << "," << t->priority << endl;
+        cout << t->burst << "," << t->arrival << "," << t->priority<<" , "<<"id : "<<t->pid << endl;
         t = t->next;
     }
     cout << endl;
@@ -499,10 +530,10 @@ void result(struct node *process)
     outputfile << "Scheduling method : " << smethod << endl;
     for (int i = 0; i < length(process); i++)
     {
-        cout << "p" << i + 1 << " : "
+        cout << "p" << temp->pid << " : "
              << "waiting time = " << temp->waitingtime << endl;
 
-        outputfile << "p" << i + 1 << " : "
+        outputfile << "p" << temp->pid << " : "
                    << "waiting time = " << temp->waitingtime << endl;
 
         totalWaitingTime += temp->waitingtime;
