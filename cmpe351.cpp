@@ -16,6 +16,7 @@ struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
 void display(struct node *);
 void arrivalsort(node *&);
+void apsort(node *&);
 void burstsort(node *&);
 void prioritysort(node *&);
 struct node
@@ -23,11 +24,12 @@ struct node
     int burst, arrival, priority, waitingtime;
     int pid;
     struct node *next;
+    bool executed;
 };
 string inputFilename;
 string outputFilename;
 string smethod;
-int id=1;
+int id = 1;
 int main(int argc, char *argv[])
 {
     struct node *process = NULL;
@@ -83,7 +85,6 @@ int main(int argc, char *argv[])
     b << inputFile.rdbuf();
     inputFile.close();
     string fileContents = b.str();
-    
 
     istringstream iss(fileContents);
     string line;
@@ -92,12 +93,12 @@ int main(int argc, char *argv[])
         istringstream iss2(line);
         string num1, num2, num3;
         char delimiter = ':';
-        getline(iss2, num1, delimiter);
-        getline(iss2, num2, delimiter);
-        getline(iss2, num3, delimiter);
-       
-
-        process = insertBack(process, stoi(num1), stoi(num2), stoi(num3));
+        if (getline(iss2, num1, delimiter) && getline(iss2, num2, delimiter) && getline(iss2, num3, delimiter))
+        {
+            process = insertBack(process, stoi(num1), stoi(num2), stoi(num3));
+        }
+        else
+            return 1;
     }
 
     // this is just a test
@@ -107,10 +108,10 @@ int main(int argc, char *argv[])
     display(process);
     cout << endl
          << "sorted: " << endl;
-    arrivalsort(process);
-    display(process);
-    //end of test
 
+    apsort(process);
+    display(process);
+    // end of test
 
     menu(process);
     return 0;
@@ -167,14 +168,13 @@ void menu(struct node *process)
             }
 
             break;
-        case '3': 
-        if (!preemtive)
-                 prioritynonpre(process);
+        case '3':
+            if (!preemtive)
+                prioritynonpre(process);
             else
             {
-               // prioritypre(process);
+                // prioritypre(process);
             }
-           
 
             break;
         case '4':
@@ -237,7 +237,8 @@ struct node *createNode(int burst, int arrival, int priority)
     temp->priority = priority;
     temp->waitingtime = 0;
     temp->next = NULL;
-    temp->pid=id;
+    temp->pid = id;
+    temp->executed = false;
     id++;
     return temp;
 }
@@ -291,6 +292,7 @@ void arrivalsort(node *&head)
                 swap(current->burst, current->next->burst);
                 swap(current->priority, current->next->priority);
                 swap(current->waitingtime, current->next->waitingtime);
+                swap(current->pid, current->next->pid);
                 swapped = true;
             }
             current = current->next;
@@ -325,6 +327,7 @@ void burstsort(node *&head)
                 swap(current->burst, current->next->burst);
                 swap(current->priority, current->next->priority);
                 swap(current->waitingtime, current->next->waitingtime);
+                swap(current->pid, current->next->pid);
                 swapped = true;
             }
             current = current->next;
@@ -359,10 +362,48 @@ void prioritysort(node *&head)
                 swap(current->burst, current->next->burst);
                 swap(current->priority, current->next->priority);
                 swap(current->waitingtime, current->next->waitingtime);
+                swap(current->pid, current->next->pid);
                 swapped = true;
             }
             current = current->next;
         }
+        last = current;
+
+    } while (swapped);
+}
+void apsort(node *&head)
+{
+    if (head == nullptr || head->next == nullptr)
+    {
+        return; // No need to sort
+    }
+
+    bool swapped;
+    node *current;
+    node *last = nullptr;
+    do
+    {
+        swapped = false;
+        current = head;
+
+        while (current->next != last)
+        {
+            if (current->arrival == current->next->arrival)
+            {
+                if (current->priority > current->next->priority)
+                {
+                    // Swap the nodes
+                    swap(current->arrival, current->next->arrival);
+                    swap(current->burst, current->next->burst);
+                    swap(current->priority, current->next->priority);
+                    swap(current->waitingtime, current->next->waitingtime);
+                    swap(current->pid, current->next->pid);
+                    swapped = true;
+                }
+            }
+            current = current->next;
+        }
+
         last = current;
 
     } while (swapped);
@@ -446,26 +487,45 @@ void sjfpre(struct node *process)
     }
     menu(process);
 }
-void prioritynonpre(node* process) {
-    arrivalsort(process);
-    node* current = process;
-    int timer = 0;
-    while (current != nullptr) {
-        
-        if (current->arrival <= timer) {
-            current->waitingtime = timer - current->arrival;
-
-            // Update current time
-            timer += current->burst;
-
-            // Move to the next process
-            current = current->next;
-        } else {
-            // If the process hasn't arrived, wait for it
-            timer++;
-        }
+void prioritynonpre(node *head)
+{
+    if (head == nullptr || head->next == nullptr)
+    {
+        return; // No need to schedule
     }
-    menu(process);
+
+    apsort(head);
+
+    node *select = NULL;
+    int timer = head->arrival;
+    node *temp = head;
+    if (temp->executed == true)
+        temp = temp->next;
+    else
+    {
+        select = temp;
+        temp = temp->next
+    }
+    while(select)
+    {
+    while (temp)
+    {
+        if (select->arrival <= timer && temp->arrival <= timer)
+        {
+            if (select->priority < temp->priority)
+            {
+                temp=temp->next;
+               
+            }
+            
+
+        }else
+        select->waitingtime=timer-select->arrival;
+        timer=timer+select->burst;
+    }
+    
+}
+menu(head);
 }
 void rrpre()
 {
@@ -508,7 +568,8 @@ void display(struct node *h)
     struct node *t = h;
     while (t != NULL)
     {
-        cout << t->burst << "," << t->arrival << "," << t->priority<<" , "<<"id : "<<t->pid << endl;
+        cout << t->burst << "," << t->arrival << "," << t->priority << " , "
+             << "id : " << t->pid << endl;
         t = t->next;
     }
     cout << endl;
