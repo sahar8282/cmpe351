@@ -489,7 +489,7 @@ void sjfpre(struct node *process)
 }
 void prioritynonpre(node *head)
 {
-    if (head == nullptr || head->next == nullptr)
+     if (head == nullptr || head->next == nullptr)
     {
         return; // No need to schedule
     }
@@ -498,33 +498,42 @@ void prioritynonpre(node *head)
 
     node *select = NULL;
     int timer = head->arrival;
-    node *temp = head;
-    if (temp->executed == true)
-        temp = temp->next;
-    else
+    cout << length(head);
+
+    for (int i = 1; i <= length(head); i++)
     {
-        select = temp;
-        temp = temp->next
-    }
-    while(select)
-    {
-    while (temp)
-    {
-        if (select->arrival <= timer && temp->arrival <= timer)
+        node *temp = head;
+
+        while (temp->executed == true)
         {
-            if (select->priority < temp->priority)
+            temp = temp->next;
+        }
+
+        select = temp;
+        temp = temp->next;
+
+        while (select->executed == false)
+        {
+
+            if (select->arrival <= timer && temp->arrival <= timer)
             {
-                temp=temp->next;
-               
+
+                if (select->priority <= temp->priority)
+                {
+                    temp = temp->next;
+                }
+                else
+                    select = temp;
             }
-            
-        }else
-        select->waitingtime=timer-select->arrival;
-        timer=timer+select->burst;
+
+            select->waitingtime = timer - select->arrival;
+            select->executed = true;
+            timer = timer + select->burst;
+            cout << timer;
+        }
     }
-    
-}
-menu(head);
+
+    menu(head);
 }
 void rrpre()
 {
