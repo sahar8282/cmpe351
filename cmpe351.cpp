@@ -8,6 +8,7 @@ void menu(struct node *);
 void fcfs(struct node *);
 void sjfnonpre(struct node *);
 void sjfpre(struct node *);
+void swapNodes(node *&, node *, node *);
 void prioritynonpre(struct node *);
 void prioritypre(struct node *);
 void rrpre(struct node *);
@@ -141,7 +142,7 @@ void menu(struct node *process)
              << "2-shortest job first" << endl
              << "3-priority scheduling" << endl
              << "4-Round-Robin" << endl
-             << "5-none"
+             << "5-none" << endl
              << "6-back to menu" << endl;
         cout << "*************************************" << endl;
         cin >> methodchoice;
@@ -181,6 +182,14 @@ void menu(struct node *process)
             //  rrpre(process);
 
             break;
+        case '5':
+            //  rrpre(process);
+
+            break;
+        case '6':
+            menu(process);
+            break;
+
         default:
             cout << "wrong";
             menu(process);
@@ -268,6 +277,60 @@ int length(struct node *head)
     }
     return len;
 }
+void swapNodes(node *&head, node *node1, node *node2)
+{
+    if (node1 == nullptr || node2 == nullptr || node1 == node2)
+    {
+        // No need to swap if nodes are invalid or the same
+        return;
+    }
+
+    // Search for nodes in the list
+    node *prev1 = nullptr, *curr1 = head;
+    while (curr1 != nullptr && curr1 != node1)
+    {
+        prev1 = curr1;
+        curr1 = curr1->next;
+    }
+
+    node *prev2 = nullptr, *curr2 = head;
+    while (curr2 != nullptr && curr2 != node2)
+    {
+        prev2 = curr2;
+        curr2 = curr2->next;
+    }
+
+    // Check if both nodes are found in the list
+    if (curr1 == nullptr || curr2 == nullptr)
+    {
+        std::cout << "One or both nodes not found in the list." << std::endl;
+        return;
+    }
+
+    // Update pointers to swap nodes
+    if (prev1 != nullptr)
+    {
+        prev1->next = node2;
+    }
+    else
+    {
+        head = node2;
+    }
+
+    if (prev2 != nullptr)
+    {
+        prev2->next = node1;
+    }
+    else
+    {
+        head = node1;
+    }
+
+    // Swap the next pointers of the nodes
+    node *temp = node1->next;
+    node1->next = node2->next;
+    node2->next = temp;
+}
 void arrivalsort(node *&head)
 {
     if (head == nullptr || head->next == nullptr)
@@ -288,11 +351,7 @@ void arrivalsort(node *&head)
             if (current->arrival > current->next->arrival)
             {
                 // Swap the nodes
-                swap(current->arrival, current->next->arrival);
-                swap(current->burst, current->next->burst);
-                swap(current->priority, current->next->priority);
-                swap(current->waitingtime, current->next->waitingtime);
-                swap(current->pid, current->next->pid);
+                swapNodes(head,current,current->next);
                 swapped = true;
             }
             current = current->next;
@@ -323,11 +382,7 @@ void burstsort(node *&head)
             if (current->burst > current->next->burst)
             {
                 // Swap the nodes
-                swap(current->arrival, current->next->arrival);
-                swap(current->burst, current->next->burst);
-                swap(current->priority, current->next->priority);
-                swap(current->waitingtime, current->next->waitingtime);
-                swap(current->pid, current->next->pid);
+                swapNodes(head,current,current->next);
                 swapped = true;
             }
             current = current->next;
@@ -358,11 +413,7 @@ void prioritysort(node *&head)
             if (current->priority > current->next->priority)
             {
                 // Swap the nodes
-                swap(current->arrival, current->next->arrival);
-                swap(current->burst, current->next->burst);
-                swap(current->priority, current->next->priority);
-                swap(current->waitingtime, current->next->waitingtime);
-                swap(current->pid, current->next->pid);
+                swapNodes(head,current,current->next);
                 swapped = true;
             }
             current = current->next;
@@ -393,11 +444,7 @@ void apsort(node *&head)
                 if (current->priority > current->next->priority)
                 {
                     // Swap the nodes
-                    swap(current->arrival, current->next->arrival);
-                    swap(current->burst, current->next->burst);
-                    swap(current->priority, current->next->priority);
-                    swap(current->waitingtime, current->next->waitingtime);
-                    swap(current->pid, current->next->pid);
+                    swapNodes(head,current,current->next);
                     swapped = true;
                 }
             }
@@ -489,7 +536,7 @@ void sjfpre(struct node *process)
 }
 void prioritynonpre(node *head)
 {
-     if (head == nullptr || head->next == nullptr)
+    if (head == nullptr || head->next == nullptr)
     {
         return; // No need to schedule
     }
