@@ -8,7 +8,7 @@ void menu(struct node *);
 void fcfs(struct node *);
 void sjfnonpre(struct node *);
 void sjfpre(struct node *);
-void swapNodes(node *&, node *, node *);
+void swapNodes(struct node *&, struct node *, struct node *);
 void prioritynonpre(struct node *);
 void prioritypre(struct node *);
 void rrpre(struct node *);
@@ -16,10 +16,10 @@ void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
 void display(struct node *);
-void arrivalsort(node *&);
-void apsort(node *&);
-void burstsort(node *&);
-void prioritysort(node *&);
+void arrivalsort(struct node *&);
+void apsort(struct node *&);
+void burstsort(struct node *&);
+void prioritysort(struct node *&);
 struct node
 {
     int burst, arrival, priority, waitingtime;
@@ -124,19 +124,19 @@ void menu(struct node *process)
     char methodchoice;
     char menuchoose;
     cout << endl
-         << "*************************************" << endl;
+         << "*************" << endl;
     cout << "CPU Scheduler Simulator" << endl;
     cout << "1) choosing Scheduling Method " << endl
          << "2) choosing Preemptive Mode" << endl
          << "3) Show Result" << endl
          << "4) End Program" << endl;
-    cout << "*************************************" << endl;
+    cout << "*************" << endl;
     cin >> menuchoose;
 
     switch (menuchoose)
     {
     case '1':
-        cout << "*************************************" << endl;
+        cout << "*************" << endl;
         cout << "choose your Scheduling Method (None)" << endl
              << "1-first come first served " << endl
              << "2-shortest job first" << endl
@@ -144,7 +144,7 @@ void menu(struct node *process)
              << "4-Round-Robin" << endl
              << "5-none" << endl
              << "6-back to menu" << endl;
-        cout << "*************************************" << endl;
+        cout << "*************" << endl;
         cin >> methodchoice;
 
         switch (methodchoice)
@@ -199,10 +199,10 @@ void menu(struct node *process)
         break;
 
     case '2':
-        cout << "*************************************" << endl;
+        cout << "*************" << endl;
         cout << "1-preemtive mode on " << endl
              << "2-preemtive mode off" << endl;
-        cout << "*************************************" << endl;
+        cout << "*************" << endl;
         cin >> preemtivechoose;
         if (preemtivechoose == '1')
             preemtive = true;
@@ -231,7 +231,7 @@ void menu(struct node *process)
         break;
 
     default:
-        cout << "*************************************" << endl;
+        cout << "*************" << endl;
         cout << "wrong choice";
         menu(process);
         break;
@@ -277,7 +277,7 @@ int length(struct node *head)
     }
     return len;
 }
-void swapNodes(node *&head, node *node1, node *node2)
+void swapNodes(struct node *&head, struct node *node1, struct node *node2)
 {
     if (node1 == nullptr || node2 == nullptr || node1 == node2)
     {
@@ -286,14 +286,14 @@ void swapNodes(node *&head, node *node1, node *node2)
     }
 
     // Search for nodes in the list
-    node *prev1 = nullptr, *curr1 = head;
+    struct node *prev1 = nullptr, *curr1 = head;
     while (curr1 != nullptr && curr1 != node1)
     {
         prev1 = curr1;
         curr1 = curr1->next;
     }
 
-    node *prev2 = nullptr, *curr2 = head;
+    struct node *prev2 = nullptr, *curr2 = head;
     while (curr2 != nullptr && curr2 != node2)
     {
         prev2 = curr2;
@@ -327,11 +327,11 @@ void swapNodes(node *&head, node *node1, node *node2)
     }
 
     // Swap the next pointers of the nodes
-    node *temp = node1->next;
+    struct node *temp = node1->next;
     node1->next = node2->next;
     node2->next = temp;
 }
-void arrivalsort(node *&head)
+void arrivalsort(struct node *&head)
 {
     if (head == nullptr || head->next == nullptr)
     {
@@ -339,8 +339,8 @@ void arrivalsort(node *&head)
     }
 
     bool swapped;
-    node *current;
-    node *last = nullptr;
+    struct node *current;
+    struct node *last = nullptr;
     do
     {
         swapped = false;
@@ -351,7 +351,7 @@ void arrivalsort(node *&head)
             if (current->arrival > current->next->arrival)
             {
                 // Swap the nodes
-                swapNodes(head,current,current->next);
+                swapNodes(head, current, current->next);
                 swapped = true;
             }
             current = current->next;
@@ -361,7 +361,7 @@ void arrivalsort(node *&head)
 
     } while (swapped);
 }
-void burstsort(node *&head)
+void burstsort(struct node *&head)
 {
     if (head == nullptr || head->next == nullptr)
     {
@@ -369,8 +369,8 @@ void burstsort(node *&head)
     }
 
     bool swapped;
-    node *current;
-    node *last = nullptr;
+    struct node *current;
+    struct node *last = nullptr;
 
     do
     {
@@ -382,7 +382,7 @@ void burstsort(node *&head)
             if (current->burst > current->next->burst)
             {
                 // Swap the nodes
-                swapNodes(head,current,current->next);
+                swapNodes(head, current, current->next);
                 swapped = true;
             }
             current = current->next;
@@ -392,7 +392,7 @@ void burstsort(node *&head)
 
     } while (swapped);
 }
-void prioritysort(node *&head)
+void prioritysort(struct node *&head)
 {
     if (head == nullptr || head->next == nullptr)
     {
@@ -400,8 +400,8 @@ void prioritysort(node *&head)
     }
 
     bool swapped;
-    node *current;
-    node *last = nullptr;
+    struct node *current;
+    struct node *last = nullptr;
 
     do
     {
@@ -413,7 +413,7 @@ void prioritysort(node *&head)
             if (current->priority > current->next->priority)
             {
                 // Swap the nodes
-                swapNodes(head,current,current->next);
+                swapNodes(head, current, current->next);
                 swapped = true;
             }
             current = current->next;
@@ -422,7 +422,7 @@ void prioritysort(node *&head)
 
     } while (swapped);
 }
-void apsort(node *&head)
+void apsort(struct node *&head)
 {
     if (head == nullptr || head->next == nullptr)
     {
@@ -430,8 +430,8 @@ void apsort(node *&head)
     }
 
     bool swapped;
-    node *current;
-    node *last = nullptr;
+    struct node *current;
+    struct node *last = nullptr;
     do
     {
         swapped = false;
@@ -444,7 +444,7 @@ void apsort(node *&head)
                 if (current->priority > current->next->priority)
                 {
                     // Swap the nodes
-                    swapNodes(head,current,current->next);
+                    swapNodes(head, current, current->next);
                     swapped = true;
                 }
             }
@@ -466,7 +466,7 @@ void sjfnonpre(struct node *process)
         return;
     }
 
-    node *current = process;
+    struct node *current = process;
     int timer = 0;
 
     while (current)
@@ -491,7 +491,7 @@ void sjfpre(struct node *process)
         return;
     }
 
-    node *current = process;
+    struct node *current = process;
     int timer = 0;
 
     while (current)
@@ -502,8 +502,8 @@ void sjfpre(struct node *process)
             timer = current->arrival;
         }
 
-        node *shortestJob = current;
-        node *temp = current->next;
+        struct node *shortestJob = current;
+        struct node *temp = current->next;
 
         while (temp && temp->arrival <= timer)
         {
@@ -522,7 +522,7 @@ void sjfpre(struct node *process)
         }
         else
         {
-            node *temp = current;
+            struct node *temp = current;
             while (temp->next != shortestJob)
             {
                 temp = temp->next;
@@ -534,7 +534,7 @@ void sjfpre(struct node *process)
     }
     menu(process);
 }
-void prioritynonpre(node *head)
+void prioritynonpre(struct node *head)
 {
     if (head == nullptr || head->next == nullptr)
     {
@@ -542,41 +542,46 @@ void prioritynonpre(node *head)
     }
 
     apsort(head);
-
-    node *select = NULL;
-    int timer = head->arrival;
-    cout << length(head);
-
-    for (int i = 1; i <= length(head); i++)
+    int timer = 0;
+    struct node *temp;
+    struct node *select;
+    int remain = length(head);
+    while (remain > 0)
     {
-        node *temp = head;
-
-        while (temp->executed == true)
+        temp = head;
+        select = NULL;
+        while (temp != NULL)
         {
-            temp = temp->next;
-        }
-
-        select = temp;
-        temp = temp->next;
-
-        while (select->executed == false)
-        {
-
-            if (select->arrival <= timer && temp->arrival <= timer)
+            if (temp->arrival > timer)
             {
-
-                if (select->priority <= temp->priority)
-                {
-                    temp = temp->next;
-                }
-                else
+                break;
+            }
+            else if (temp->executed == true)
+            {
+                temp = temp->next;
+                continue;
+            }
+            else if (select != NULL)
+            {
+                if (select->arrival > temp->arrival)
+                    select = temp;
+                else if (select->priority > temp->priority)
                     select = temp;
             }
-
+            else
+                select = temp;
+            temp = temp->next;
+        }
+        if (select == NULL)
+        {
+            timer++;
+        }
+        else
+        {
+            remain--;
             select->waitingtime = timer - select->arrival;
+            timer += select->burst;
             select->executed = true;
-            timer = timer + select->burst;
-            cout << timer;
         }
     }
 
@@ -597,7 +602,7 @@ void fcfs(struct node *head)
         cout << "Linked list is empty.\n";
         return;
     }
-    node *current = head;
+    struct node *current = head;
     int timer = 0;
     float totalWaitingTime = 0.0;
     while (current)
