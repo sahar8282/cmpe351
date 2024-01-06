@@ -447,10 +447,30 @@ void apsort(struct node *&head)
         // If the list is empty or has only one element, it's already sorted
         return;
     }
-
-    int swapped;
+     int swapped;
     struct node *ptr1;
     struct node *lptr = NULL;
+
+    do
+    {
+        swapped = 0;
+        ptr1 = head;
+
+        while (ptr1->next != lptr)
+        {
+            
+                if (ptr1->arrival > ptr1->next->arrival)
+            {
+                swapNode(ptr1, (ptr1->next));
+                swapped = 1;
+            }
+            
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+
+    lptr = NULL;
 
     do
     {
