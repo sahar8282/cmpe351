@@ -9,7 +9,7 @@ void fcfs(struct node *);
 void sjfnonpre(struct node *);
 void sjfpre(node **);
 void prioritynonpre(struct node *);
-void prioritypre(struct node *);
+void prioritypre( node **);
 void rrpre(struct node *);
 void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
@@ -123,7 +123,6 @@ int main(int argc, char *argv[])
     display(process);
     cout << endl
          << "ap sorted: " << endl;
-
     apsort(process);
     display(process);
     // end of test
@@ -187,7 +186,7 @@ void menu(struct node *process)
                 prioritynonpre(process);
             else
             {
-                // prioritypre(process);
+                prioritypre(&process);
             }
 
             break;
@@ -290,34 +289,6 @@ int length(struct node *head)
         temp = temp->next;
     }
     return len;
-}
-
-void swapNodes(struct node **head, struct node *a, struct node *b)
-{
-    struct node *prevA = NULL;
-    struct node *current = *head;
-
-    // Find the previous node of a
-    while (current != NULL && current != a)
-    {
-        prevA = current;
-        current = current->next;
-    }
-
-    // If a is not present in the list
-    if (current == NULL)
-        return;
-
-    // Update the next pointer of the previous node of a
-    if (prevA != NULL)
-        prevA->next = b;
-    else
-        *head = b; // Update head if a was the first node
-
-    // Swap the next pointers of a and b
-    struct node *temp = b->next;
-    b->next = a->next;
-    a->next = temp;
 }
 
 void swapNode(struct node *&a, struct node *&b)
@@ -469,41 +440,38 @@ void pidsort(struct node *&head)
         lptr = ptr1;
     } while (swapped);
 }
-
 void apsort(struct node *&head)
 {
-    if (head == nullptr || head->next == nullptr)
+    if (head == NULL || head->next == NULL)
     {
-        return; // No need to sort
+        // If the list is empty or has only one element, it's already sorted
+        return;
     }
 
-    bool swapped;
-    struct node *current;
-    struct node *last = nullptr;
+    int swapped;
+    struct node *ptr1;
+    struct node *lptr = NULL;
+
     do
     {
-        swapped = false;
-        current = head;
+        swapped = 0;
+        ptr1 = head;
 
-        while (current->next != last)
+        while (ptr1->next != lptr)
         {
-            if (current->arrival == current->next->arrival)
+            if(ptr1->arrival==ptr1->next->arrival)
             {
-                if (current->priority > current->next->priority)
-                {
-                    // Swap the nodes
-                    swapNodes(&head, current, current->next);
-                    swapped = true;
-                }
+                if (ptr1->priority > ptr1->next->priority)
+            {
+                swapNode(ptr1, (ptr1->next));
+                swapped = 1;
             }
-            current = current->next;
+            }
+            ptr1 = ptr1->next;
         }
-
-        last = current;
-
+        lptr = ptr1;
     } while (swapped);
 }
-
 void sjfnonpre(struct node *process)
 {
     burstsort(process);
@@ -648,6 +616,70 @@ void prioritynonpre(struct node *head)
     }
 
     menu(head);
+}
+void prioritypre(node **process)
+{
+     prioritysort(*process);
+
+    smethod = "priority scheduling _ preemtive";
+    struct node *temp = *process;
+    
+    
+    int timer = 0;
+    int count = length(*process);
+    struct node *min;
+
+
+    for (int i = 0; i < length(*process); i++)
+    {
+        temp->timepassed = 0;
+        temp = temp->next;
+    }
+
+   
+
+    while (count > 0)
+    {
+        temp = *process;
+        min = NULL;
+        while (min == NULL)
+        {
+            while (temp != NULL)
+            {
+                if (timer >= temp->arrival)
+                {
+                    if (temp->timepassed < temp->burst)
+                    {
+                        if (min == NULL)
+                        {
+                            min = temp;
+                        }
+                        else
+                        {
+                            if (min->priority == temp->priority && min->arrival > temp->arrival)
+                            {
+                                min = temp;
+                            }
+                            else if (min->priority > temp->priority)
+                            {
+                                min = temp;
+                            }
+                        }
+                    }
+                }
+                temp = temp->next;
+            }
+            timer++;
+        }
+        min->timepassed++;
+        if (min->timepassed == min->burst)
+        {
+            min->waitingtime = timer - min->arrival - min->burst;
+            count--;
+        }
+    }
+    menu(*process);
+
 }
 void rrpre()
 {
