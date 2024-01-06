@@ -7,8 +7,7 @@ using namespace std;
 void menu(struct node *);
 void fcfs(struct node *);
 void sjfnonpre(struct node *);
-void sjfpre(struct node *);
-void swapNodes(struct node *&, struct node *, struct node *);
+void sjfpre(node **);
 void prioritynonpre(struct node *);
 void prioritypre(struct node *);
 void rrpre(struct node *);
@@ -16,6 +15,7 @@ void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
 void display(struct node *);
+void swapNodes(struct node **, struct node *, struct node *);
 void arrivalsort(struct node *&);
 void apsort(struct node *&);
 void burstsort(struct node *&);
@@ -26,11 +26,14 @@ struct node
     int pid;
     struct node *next;
     bool executed;
+    int timepassed;
 };
+
 string inputFilename;
 string outputFilename;
 string smethod;
 int id = 1;
+
 int main(int argc, char *argv[])
 {
     struct node *process = NULL;
@@ -110,7 +113,7 @@ int main(int argc, char *argv[])
     cout << endl
          << "sorted: " << endl;
 
-    apsort(process);
+    burstsort(process);
     display(process);
     // end of test
 
@@ -165,7 +168,7 @@ void menu(struct node *process)
                 sjfnonpre(process);
             else
             {
-                sjfpre(process);
+                sjfpre(&process);
             }
 
             break;
@@ -183,7 +186,7 @@ void menu(struct node *process)
 
             break;
         case '5':
-            //  rrpre(process);
+            cout << "you choose non of the methodes" << endl;
 
             break;
         case '6':
@@ -248,9 +251,11 @@ struct node *createNode(int burst, int arrival, int priority)
     temp->next = NULL;
     temp->pid = id;
     temp->executed = false;
+    temp->timepassed = 0;
     id++;
     return temp;
 }
+
 struct node *insertBack(struct node *header, int burst, int arrival, int priority)
 {
     struct node *temp = createNode(burst, arrival, priority);
@@ -277,151 +282,156 @@ int length(struct node *head)
     }
     return len;
 }
-void swapNodes(struct node *&head, struct node *node1, struct node *node2)
+
+void swapNodes(struct node **head, struct node *a, struct node *b)
 {
-    if (node1 == nullptr || node2 == nullptr || node1 == node2)
+    struct node *prevA = NULL;
+    struct node *current = *head;
+
+    // Find the previous node of a
+    while (current != NULL && current != a)
     {
-        // No need to swap if nodes are invalid or the same
+        prevA = current;
+        current = current->next;
+    }
+
+    // If a is not present in the list
+    if (current == NULL)
         return;
-    }
 
-    // Search for nodes in the list
-    struct node *prev1 = nullptr, *curr1 = head;
-    while (curr1 != nullptr && curr1 != node1)
-    {
-        prev1 = curr1;
-        curr1 = curr1->next;
-    }
-
-    struct node *prev2 = nullptr, *curr2 = head;
-    while (curr2 != nullptr && curr2 != node2)
-    {
-        prev2 = curr2;
-        curr2 = curr2->next;
-    }
-
-    // Check if both nodes are found in the list
-    if (curr1 == nullptr || curr2 == nullptr)
-    {
-        std::cout << "One or both nodes not found in the list." << std::endl;
-        return;
-    }
-
-    // Update pointers to swap nodes
-    if (prev1 != nullptr)
-    {
-        prev1->next = node2;
-    }
+    // Update the next pointer of the previous node of a
+    if (prevA != NULL)
+        prevA->next = b;
     else
-    {
-        head = node2;
-    }
+        *head = b; // Update head if a was the first node
 
-    if (prev2 != nullptr)
-    {
-        prev2->next = node1;
-    }
-    else
-    {
-        head = node1;
-    }
-
-    // Swap the next pointers of the nodes
-    struct node *temp = node1->next;
-    node1->next = node2->next;
-    node2->next = temp;
+    // Swap the next pointers of a and b
+    struct node *temp = b->next;
+    b->next = a->next;
+    a->next = temp;
 }
+
+void swapNode(struct node *&a, struct node *&b)
+{
+    int temp = a->burst;
+    a->burst = b->burst;
+    b->burst = temp;
+
+    temp = a->arrival;
+    a->arrival = b->arrival;
+    b->arrival = temp;
+
+    temp = a->priority;
+    a->priority = b->priority;
+    b->priority = temp;
+
+    temp = a->waitingtime;
+    a->waitingtime = b->waitingtime;
+    b->waitingtime = temp;
+
+    temp = a->pid;
+    a->pid = b->pid;
+    b->pid = temp;
+
+    bool temp2 = a->executed;
+    a->executed = b->executed;
+    b->executed = temp;
+
+    temp = a->timepassed;
+    a->timepassed = b->timepassed;
+    b->timepassed = temp;
+}
+
 void arrivalsort(struct node *&head)
 {
-    if (head == nullptr || head->next == nullptr)
+    if (head == NULL || head->next == NULL)
     {
-        return; // No need to sort
+        // If the list is empty or has only one element, it's already sorted
+        return;
     }
 
-    bool swapped;
-    struct node *current;
-    struct node *last = nullptr;
+    int swapped;
+    struct node *ptr1;
+    struct node *lptr = NULL;
+
     do
     {
-        swapped = false;
-        current = head;
+        swapped = 0;
+        ptr1 = head;
 
-        while (current->next != last)
+        while (ptr1->next != lptr)
         {
-            if (current->arrival > current->next->arrival)
+            if (ptr1->burst > ptr1->next->burst)
             {
-                // Swap the nodes
-                swapNodes(head, current, current->next);
-                swapped = true;
+                swapNode(ptr1, (ptr1->next));
+                swapped = 1;
             }
-            current = current->next;
+            ptr1 = ptr1->next;
         }
-
-        last = current;
-
+        lptr = ptr1;
     } while (swapped);
 }
+
 void burstsort(struct node *&head)
 {
-    if (head == nullptr || head->next == nullptr)
+    if (head == NULL || head->next == NULL)
     {
-        return; // No need to sort
+        // If the list is empty or has only one element, it's already sorted
+        return;
     }
 
-    bool swapped;
-    struct node *current;
-    struct node *last = nullptr;
+    int swapped;
+    struct node *ptr1;
+    struct node *lptr = NULL;
 
     do
     {
-        swapped = false;
-        current = head;
+        swapped = 0;
+        ptr1 = head;
 
-        while (current->next != last)
+        while (ptr1->next != lptr)
         {
-            if (current->burst > current->next->burst)
+            if (ptr1->burst > ptr1->next->burst)
             {
-                // Swap the nodes
-                swapNodes(head, current, current->next);
-                swapped = true;
+                swapNode(ptr1, (ptr1->next));
+                swapped = 1;
             }
-            current = current->next;
+            ptr1 = ptr1->next;
         }
-
-        last = current;
-
+        lptr = ptr1;
     } while (swapped);
 }
+
 void prioritysort(struct node *&head)
 {
-    if (head == nullptr || head->next == nullptr)
+    if (head == NULL || head->next == NULL)
     {
-        return; // No need to sort
+        // If the list is empty or has only one element, it's already sorted
+        return;
     }
 
-    bool swapped;
-    struct node *current;
-    struct node *last = nullptr;
+    int swapped;
+    struct node *ptr1;
+    struct node *lptr = NULL;
 
     do
     {
-        swapped = false;
-        current = head;
+        swapped = 0;
+        ptr1 = head;
 
-        while (current->next != last)
+        while (ptr1->next != lptr)
         {
-            if (current->priority > current->next->priority)
+            if (ptr1->priority > ptr1->next->priority)
             {
-                // Swap the nodes
-                swapNodes(head, current, current->next);
-                swapped = true;
+                swapNode(ptr1, (ptr1->next));
+                swapped = 1;
             }
-            current = current->next;
+            ptr1 = ptr1->next;
         }
-        last = current;
-
+        lptr = ptr1;
     } while (swapped);
 }
+
 void apsort(struct node *&head)
 {
     if (head == nullptr || head->next == nullptr)
@@ -444,7 +454,7 @@ void apsort(struct node *&head)
                 if (current->priority > current->next->priority)
                 {
                     // Swap the nodes
-                    swapNodes(head, current, current->next);
+                    swapNodes(&head, current, current->next);
                     swapped = true;
                 }
             }
@@ -455,6 +465,7 @@ void apsort(struct node *&head)
 
     } while (swapped);
 }
+
 void sjfnonpre(struct node *process)
 {
     burstsort(process);
@@ -482,60 +493,73 @@ void sjfnonpre(struct node *process)
     }
     menu(process);
 }
-void sjfpre(struct node *process)
+void sjfpre(node **process)
 {
-    arrivalsort(process);
-    if (!process)
+    burstsort(*process);
+
+    smethod = "shortest job first _ preemtive";
+    struct node *temp = *process;
+    
+    
+    int timer = 0;
+    int count = length(*process);
+    struct node *min;
+
+
+    for (int i = 0; i < length(*process); i++)
     {
-        cout << "there is no process!" << endl;
-        return;
+        temp->timepassed = 0;
+        temp = temp->next;
     }
 
-    struct node *current = process;
-    int timer = 0;
+   
 
-    while (current)
+    while (count > 0)
     {
-        if (current->arrival > timer)
+        temp = *process;
+        min = NULL;
+        while (min == NULL)
         {
-
-            timer = current->arrival;
-        }
-
-        struct node *shortestJob = current;
-        struct node *temp = current->next;
-
-        while (temp && temp->arrival <= timer)
-        {
-            if (temp->burst < shortestJob->burst)
+            while (temp != NULL)
             {
-                shortestJob = temp;
-            }
-            temp = temp->next;
-        }
-
-        if (shortestJob == current)
-        {
-            timer += current->burst;
-            current->waitingtime = timer - current->arrival - current->burst;
-            current = current->next;
-        }
-        else
-        {
-            struct node *temp = current;
-            while (temp->next != shortestJob)
-            {
+                if (timer >= temp->arrival)
+                {
+                    if (temp->timepassed < temp->burst)
+                    {
+                        if (min == NULL)
+                        {
+                            min = temp;
+                        }
+                        else
+                        {
+                            if ((min->burst - min->timepassed) == (temp->burst - temp->timepassed) && min->arrival > temp->arrival)
+                            {
+                                min = temp;
+                            }
+                            else if ((min->burst - min->timepassed) > (temp->burst - temp->timepassed))
+                            {
+                                min = temp;
+                            }
+                        }
+                    }
+                }
                 temp = temp->next;
             }
-            temp->next = shortestJob->next;
-            shortestJob->next = current;
-            current = shortestJob;
+            timer++;
+        }
+        min->timepassed++;
+        if (min->timepassed == min->burst)
+        {
+            min->waitingtime = timer - min->arrival - min->burst;
+            count--;
         }
     }
-    menu(process);
+    menu(*process);
 }
 void prioritynonpre(struct node *head)
 {
+    smethod = "priority scheduling _ non preemtive";
+
     if (head == nullptr || head->next == nullptr)
     {
         return; // No need to schedule
