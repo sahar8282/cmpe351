@@ -20,6 +20,7 @@ void arrivalsort(struct node *&);
 void apsort(struct node *&);
 void burstsort(struct node *&);
 void prioritysort(struct node *&);
+void pidsort(struct node *&);
 struct node
 {
     int burst, arrival, priority, waitingtime;
@@ -33,7 +34,7 @@ string inputFilename;
 string outputFilename;
 string smethod;
 int id = 1;
-
+bool preemtive;
 int main(int argc, char *argv[])
 {
     struct node *process = NULL;
@@ -111,16 +112,25 @@ int main(int argc, char *argv[])
     cout << "normal: " << endl;
     display(process);
     cout << endl
-         << "sorted: " << endl;
+         << "burst sorted: " << endl;
 
     burstsort(process);
+    display(process);
+    cout << endl
+         << " pid sorted: " << endl;
+
+    pidsort(process);
+    display(process);
+    cout << endl
+         << "ap sorted: " << endl;
+
+    apsort(process);
     display(process);
     // end of test
 
     menu(process);
     return 0;
 }
-bool preemtive;
 void menu(struct node *process)
 {
     char preemtivechoose;
@@ -255,7 +265,6 @@ struct node *createNode(int burst, int arrival, int priority)
     id++;
     return temp;
 }
-
 struct node *insertBack(struct node *header, int burst, int arrival, int priority)
 {
     struct node *temp = createNode(burst, arrival, priority);
@@ -422,6 +431,35 @@ void prioritysort(struct node *&head)
         while (ptr1->next != lptr)
         {
             if (ptr1->priority > ptr1->next->priority)
+            {
+                swapNode(ptr1, (ptr1->next));
+                swapped = 1;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+}
+void pidsort(struct node *&head)
+{
+    if (head == NULL || head->next == NULL)
+    {
+        // If the list is empty or has only one element, it's already sorted
+        return;
+    }
+
+    int swapped;
+    struct node *ptr1;
+    struct node *lptr = NULL;
+
+    do
+    {
+        swapped = 0;
+        ptr1 = head;
+
+        while (ptr1->next != lptr)
+        {
+            if (ptr1->pid > ptr1->next->pid)
             {
                 swapNode(ptr1, (ptr1->next));
                 swapped = 1;
@@ -660,6 +698,7 @@ void display(struct node *h)
 }
 void result(struct node *process)
 {
+    pidsort(process);
     struct node *temp = process;
     float totalWaitingTime = 0.0;
 
