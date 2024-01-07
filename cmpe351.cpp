@@ -6,16 +6,16 @@
 using namespace std;
 void menu(struct node *);
 void fcfs(struct node *);
-void sjfnonpre(struct node *);
+void sjfnonpre(node **);
 void sjfpre(node **);
 void prioritynonpre(struct node *);
-void prioritypre( node **);
+void prioritypre(node **);
 void rrpre(struct node *);
 void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
 void display(struct node *);
-void swapNodes(struct node **, struct node *, struct node *);
+void swapNode(struct node *&, struct node *&);
 void arrivalsort(struct node *&);
 void apsort(struct node *&);
 void burstsort(struct node *&);
@@ -112,10 +112,15 @@ int main(int argc, char *argv[])
     cout << "normal: " << endl;
     display(process);
     cout << endl
+         << "arr sorted: " << endl;
+arrivalsort(process);
+    display(process);
+    
+    cout << endl
          << "burst sorted: " << endl;
-
     burstsort(process);
     display(process);
+
     cout << endl
          << " pid sorted: " << endl;
 
@@ -174,7 +179,7 @@ void menu(struct node *process)
 
         case '2':
             if (!preemtive)
-                sjfnonpre(process);
+                sjfnonpre(&process);
             else
             {
                 sjfpre(&process);
@@ -321,10 +326,10 @@ void swapNode(struct node *&a, struct node *&b)
     a->timepassed = b->timepassed;
     b->timepassed = temp;
 }
-
+// sort functions
 void arrivalsort(struct node *&head)
 {
-    if (head == NULL || head->next == NULL)
+   if (head == NULL || head->next == NULL)
     {
         // If the list is empty or has only one element, it's already sorted
         return;
@@ -341,7 +346,7 @@ void arrivalsort(struct node *&head)
 
         while (ptr1->next != lptr)
         {
-            if (ptr1->burst > ptr1->next->burst)
+            if (ptr1->arrival > ptr1->next->arrival)
             {
                 swapNode(ptr1, (ptr1->next));
                 swapped = 1;
@@ -351,7 +356,6 @@ void arrivalsort(struct node *&head)
         lptr = ptr1;
     } while (swapped);
 }
-
 void burstsort(struct node *&head)
 {
     if (head == NULL || head->next == NULL)
@@ -381,7 +385,6 @@ void burstsort(struct node *&head)
         lptr = ptr1;
     } while (swapped);
 }
-
 void prioritysort(struct node *&head)
 {
     if (head == NULL || head->next == NULL)
@@ -447,7 +450,7 @@ void apsort(struct node *&head)
         // If the list is empty or has only one element, it's already sorted
         return;
     }
-     int swapped;
+    int swapped;
     struct node *ptr1;
     struct node *lptr = NULL;
 
@@ -458,13 +461,13 @@ void apsort(struct node *&head)
 
         while (ptr1->next != lptr)
         {
-            
-                if (ptr1->arrival > ptr1->next->arrival)
+
+            if (ptr1->arrival > ptr1->next->arrival)
             {
                 swapNode(ptr1, (ptr1->next));
                 swapped = 1;
             }
-            
+
             ptr1 = ptr1->next;
         }
         lptr = ptr1;
@@ -479,66 +482,94 @@ void apsort(struct node *&head)
 
         while (ptr1->next != lptr)
         {
-            if(ptr1->arrival==ptr1->next->arrival)
+            if (ptr1->arrival == ptr1->next->arrival)
             {
                 if (ptr1->priority > ptr1->next->priority)
-            {
-                swapNode(ptr1, (ptr1->next));
-                swapped = 1;
-            }
+                {
+                    swapNode(ptr1, (ptr1->next));
+                    swapped = 1;
+                }
             }
             ptr1 = ptr1->next;
         }
         lptr = ptr1;
     } while (swapped);
 }
-void sjfnonpre(struct node *process)
+
+// scheduling methodes
+void sjfnonpre(node **process)
 {
-    burstsort(process);
-    smethod = "shortest job first _ non preemtive";
-
-    if (!process)
-    {
-        cout << "No processes in the list." << endl;
-        return;
-    }
-
-    struct node *current = process;
-    int timer = 0;
-
-    while (current)
-    {
-        if (current->arrival > timer)
-        {
-            timer = current->arrival;
-        }
-
-        current->waitingtime = timer - current->arrival;
-        timer += current->burst;
-        current = current->next;
-    }
-    menu(process);
-}
-void sjfpre(node **process)
-{
+    pidsort(*process);
     burstsort(*process);
 
     smethod = "shortest job first _ preemtive";
     struct node *temp = *process;
-    
-    
     int timer = 0;
     int count = length(*process);
     struct node *min;
 
+    for (int i = 0; i < length(*process); i++)
+    {
+        temp->executed = false;
+        temp = temp->next;
+    }
+
+    while (count > 0)
+    {
+        temp = *process;
+        min = NULL;
+        while (min == NULL)
+        {
+            while (temp != NULL)
+            {
+                if(temp->arrival<=timer && !temp->executed )
+                {
+
+                    if((temp->burst < min->burst && min->arrival > temp->arrival)|| min==NULL)
+                     {
+                        min=temp;
+
+                    }
+                }
+                    temp = temp->next;
+            }
+                
+            }
+            
+        if (min==NULL)
+        {
+           timer++;
+
+        }
+        else
+        {
+
+             min->executed=true;
+            min->waitingtime=timer-min->arrival;
+            timer+=min->burst;
+            count--;
+        }
+    }
+    
+    menu(*process);
+}
+void sjfpre(node **process)
+{
+    pidsort(*process);
+    burstsort(*process);
+
+    smethod = "shortest job first _ preemtive";
+    struct node *temp = *process;
+
+    int timer = 0;
+    int count = length(*process);
+    struct node *min;
 
     for (int i = 0; i < length(*process); i++)
     {
         temp->timepassed = 0;
         temp = temp->next;
     }
-
-   
 
     while (count > 0)
     {
@@ -591,11 +622,19 @@ void prioritynonpre(struct node *head)
         return; // No need to schedule
     }
 
+    struct node *x = head;
+    for (int i = 0; i < length(head); i++)
+    {
+        x->executed = false;
+        x = x->next;
+    }
+    pidsort(head);
     apsort(head);
     int timer = 0;
     struct node *temp;
     struct node *select;
     int remain = length(head);
+
     while (remain > 0)
     {
         temp = head;
@@ -619,7 +658,7 @@ void prioritynonpre(struct node *head)
                     select = temp;
             }
             else
-                select = temp;
+             select = temp;
             temp = temp->next;
         }
         if (select == NULL)
@@ -639,24 +678,21 @@ void prioritynonpre(struct node *head)
 }
 void prioritypre(node **process)
 {
-     prioritysort(*process);
+    pidsort(*process);
+    prioritysort(*process);
 
     smethod = "priority scheduling _ preemtive";
     struct node *temp = *process;
-    
-    
+
     int timer = 0;
     int count = length(*process);
     struct node *min;
-
 
     for (int i = 0; i < length(*process); i++)
     {
         temp->timepassed = 0;
         temp = temp->next;
     }
-
-   
 
     while (count > 0)
     {
@@ -699,7 +735,6 @@ void prioritypre(node **process)
         }
     }
     menu(*process);
-
 }
 void rrpre()
 {
@@ -709,17 +744,27 @@ void fcfs(struct node *head)
 {
 
     smethod = "first come first served";
-
+    pidsort(head);
     arrivalsort(head);
+    
     if (!head)
     {
         cout << "Linked list is empty.\n";
         return;
     }
+
+    struct node *temp = head;
+for (int i = 0; i < length(head); i++)
+    {
+        temp->waitingtime = 0;
+        temp = temp->next;
+        
+    }
+    
     struct node *current = head;
     int timer = 0;
-    float totalWaitingTime = 0.0;
-    while (current)
+    
+    while (current!=NULL)
     {
         int i = 1;
         if (current->arrival > timer)
@@ -727,12 +772,13 @@ void fcfs(struct node *head)
             timer = current->arrival;
         }
         current->waitingtime = timer - current->arrival;
-        totalWaitingTime += current->waitingtime;
         timer += current->burst;
         current = current->next;
     }
     menu(head);
 }
+
+// result and displaying functions
 void display(struct node *h)
 {
 
@@ -754,7 +800,7 @@ void result(struct node *process)
     struct node *temp = process;
     float totalWaitingTime = 0.0;
 
-    ofstream outputfile(outputFilename);
+    ofstream outputfile(outputFilename, std::ios::app);
 
     if (!outputfile.is_open())
     {
@@ -777,5 +823,5 @@ void result(struct node *process)
     }
     float averageWaitingTime = totalWaitingTime / length(process);
     cout << "Average Waiting Time: " << averageWaitingTime << "\n";
-    outputfile << "Average Waiting Time: " << averageWaitingTime << "\n";
+    outputfile << "Average Waiting Time: " << averageWaitingTime << "\n"<<endl;
 }
