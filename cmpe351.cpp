@@ -29,12 +29,13 @@ struct node
     bool executed;
     int timepassed;
 };
-
+//global variables
 string inputFilename;
 string outputFilename;
 string smethod;
 int id = 1;
 bool preemtive;
+//main and menu functions
 int main(int argc, char *argv[])
 {
     struct node *process = NULL;
@@ -171,8 +172,8 @@ void menu(struct node *process)
                 fcfs(process);
             else
             {
-                cout << "please turn off preemtive mod off" << endl;
-                menu(process);
+                cout << "warning : fcfs doesn't support preemtive mode but you can see nonpreemtive in result" << endl;
+                fcfs(process);
             }
 
             break;
@@ -196,8 +197,16 @@ void menu(struct node *process)
 
             break;
         case '4':
-            //  rrpre(process);
-
+          /*  if (!preemtive)
+            {
+                cout << "warning : round robin doesn't support non preemtive mode but you can see preemtive in result" << endl;
+                rrpre(process);
+            }
+            else
+            {
+                rrpre(process);
+            }
+*/
             break;
         case '5':
             cout << "you choose non of the methodes" << endl;
@@ -208,7 +217,7 @@ void menu(struct node *process)
             break;
 
         default:
-            cout << "wrong";
+            cout << "wrong choice";
             menu(process);
             break;
         }
@@ -221,10 +230,12 @@ void menu(struct node *process)
              << "2-preemtive mode off" << endl;
         cout << "*************" << endl;
         cin >> preemtivechoose;
+
         if (preemtivechoose == '1')
             preemtive = true;
         else
             preemtive = false;
+
         menu(process);
         break;
 
@@ -235,11 +246,13 @@ void menu(struct node *process)
 
     case '4': /*fcfs(process);
         result(process);
-        sjfnonpre(process);
+        sjfnonpre(&process);
         result(process);
-        sjfpre(process);
+        sjfpre(&process);
         result(process);
-        priority(process);
+        prioritynonpre(process);
+        result(process);
+        prioritypre(&process);
         result(process);
         rrpre(process);
         result(process);
@@ -254,6 +267,7 @@ void menu(struct node *process)
         break;
     }
 }
+//functions used for linked list
 struct node *createNode(int burst, int arrival, int priority)
 {
     struct node *temp;
@@ -295,7 +309,36 @@ int length(struct node *head)
     }
     return len;
 }
+struct node *push(struct node *header, int burst, int arrival, int priority,int pid,int timepassed,bool executed,int waitingtime)
+{
 
+
+    struct node *temp;
+    temp = (struct node *)malloc(sizeof(struct node));
+    temp->burst = burst;
+    temp->arrival = arrival;
+    temp->priority = priority;
+    temp->waitingtime = waitingtime;
+    temp->next = NULL;
+    temp->pid = pid;
+    temp->executed = executed;
+    temp->timepassed = timepassed;
+    if (header == NULL)
+    {
+        header = temp;
+        return header;
+    }
+    
+    struct node *headertemp;
+    headertemp = header;
+    while (headertemp->next != NULL)
+    headertemp = headertemp->next;
+
+    headertemp->next = temp;
+    return header;
+    
+}
+//swapping func used in sort
 void swapNode(struct node *&a, struct node *&b)
 {
     int temp = a->burst;
@@ -331,7 +374,6 @@ void arrivalsort(struct node *&head)
 {
    if (head == NULL || head->next == NULL)
     {
-        // If the list is empty or has only one element, it's already sorted
         return;
     }
 
@@ -360,7 +402,6 @@ void burstsort(struct node *&head)
 {
     if (head == NULL || head->next == NULL)
     {
-        // If the list is empty or has only one element, it's already sorted
         return;
     }
 
@@ -389,7 +430,6 @@ void prioritysort(struct node *&head)
 {
     if (head == NULL || head->next == NULL)
     {
-        // If the list is empty or has only one element, it's already sorted
         return;
     }
 
@@ -418,7 +458,6 @@ void pidsort(struct node *&head)
 {
     if (head == NULL || head->next == NULL)
     {
-        // If the list is empty or has only one element, it's already sorted
         return;
     }
 
@@ -447,7 +486,6 @@ void apsort(struct node *&head)
 {
     if (head == NULL || head->next == NULL)
     {
-        // If the list is empty or has only one element, it's already sorted
         return;
     }
     int swapped;
@@ -619,7 +657,7 @@ void prioritynonpre(struct node *head)
 
     if (head == nullptr || head->next == nullptr)
     {
-        return; // No need to schedule
+        return; 
     }
 
     struct node *x = head;
@@ -739,6 +777,24 @@ void prioritypre(node **process)
 void rrpre()
 {
     smethod = "round robbin _ preemtive";
+    
+    struct node *temp = head;
+    for (int i = 0; i < length(head); i++)
+    {
+        temp->timepassed = 0;
+        temp = temp->next;
+        
+    }
+
+    for (int i = 0; i < length(head); i++)
+    {
+        temp->executed = false;
+        temp = temp->next;
+        
+    }
+
+
+
 }
 void fcfs(struct node *head)
 {
