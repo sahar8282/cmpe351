@@ -311,8 +311,6 @@ int length(struct node *head)
 }
 struct node *push(struct node *header, int burst, int arrival, int priority,int pid,int timepassed,bool executed,int waitingtime)
 {
-
-
     struct node *temp;
     temp = (struct node *)malloc(sizeof(struct node));
     temp->burst = burst;
