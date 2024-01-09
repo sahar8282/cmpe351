@@ -107,32 +107,7 @@ int main(int argc, char *argv[])
             return 1;
     }
 
-    // this is just a test
-    // clear this part
-    cout << fileContents << endl;
-    cout << "normal: " << endl;
-    display(process);
-    cout << endl
-         << "arr sorted: " << endl;
-    arrivalsort(process);
-    display(process);
-
-    cout << endl
-         << "burst sorted: " << endl;
-    burstsort(process);
-    display(process);
-
-    cout << endl
-         << " pid sorted: " << endl;
-
-    pidsort(process);
-    display(process);
-    cout << endl
-         << "ap sorted: " << endl;
-    apsort(process);
-    display(process);
-    // end of test
-
+   
     menu(process);
     return 0;
 }
@@ -169,30 +144,36 @@ void menu(struct node *process)
         {
         case '1':
             if (!preemtive)
-                fcfs(process);
+               { fcfs(process);
+                menu(process);}
             else
             {
                 cout << "warning : fcfs doesn't support preemtive mode but you can see nonpreemtive in result" << endl;
                 fcfs(process);
+                menu(process);
             }
 
             break;
 
         case '2':
             if (!preemtive)
-                sjfnonpre(&process);
+               { sjfnonpre(&process);
+               menu(process);}
             else
             {
                 sjfpre(&process);
+                menu(process);
             }
 
             break;
         case '3':
             if (!preemtive)
-                prioritynonpre(process);
+                {prioritynonpre(process);
+                menu(process);}
             else
             {
                 prioritypre(&process);
+                menu(process);
             }
 
             break;
@@ -201,15 +182,18 @@ void menu(struct node *process)
               {
                   cout << "warning : round robin doesn't support non preemtive mode but you can see preemtive in result" << endl;
                   rrpre(process);
+                  menu(process);
               }
               else
               {
                   rrpre(process);
+                  menu(process);
               }
   */
             break;
         case '5':
             cout << "you choose non of the methodes" << endl;
+            menu(process);
 
             break;
         case '6':
@@ -240,11 +224,16 @@ void menu(struct node *process)
         break;
 
     case '3':
-        result(process);
+    if(smethod=="")
+    {
+        cout << "you didn't choose any method please select a method : " << endl;
         menu(process);
+    }else{
+        result(process);
+        menu(process);}
         break;
 
-    case '4':
+    case '4': 
     
         fcfs(process);
         result(process);
@@ -259,11 +248,12 @@ void menu(struct node *process)
         preemtive=true;
         prioritypre(&process);
         result(process);
-        /*rrpre(process);
+      /* preemtive=true;
+       rrpre(process);
         result(process);
 */
         exit(1);
-       // break;
+        break;
 
     default:
         cout << "*************" << endl;
@@ -542,7 +532,7 @@ void sjfnonpre(node **process)
     pidsort(*process);
     burstsort(*process);
 
-    smethod = "shortest job first _ preemtive";
+    smethod = "shortest job first _non preemtive";
     struct node *temp = *process;
     int timer = 0;
     int count = length(*process);
@@ -565,7 +555,7 @@ void sjfnonpre(node **process)
                 if (temp->arrival <= timer && !temp->executed)
                 {
 
-                    if ((temp->burst < min->burst && min->arrival > temp->arrival) || min == NULL)
+                    if (min == NULL|| (temp->burst < min->burst && min->arrival > temp->arrival))
                     {
                         min = temp;
                     }
@@ -588,7 +578,7 @@ void sjfnonpre(node **process)
         }
     }
 
-    menu(*process);
+    
 }
 void sjfpre(node **process)
 {
@@ -648,7 +638,7 @@ void sjfpre(node **process)
             count--;
         }
     }
-    menu(*process);
+   
 }
 void prioritynonpre(struct node *head)
 {
@@ -710,7 +700,7 @@ void prioritynonpre(struct node *head)
         }
     }
 
-    menu(head);
+    
 }
 void prioritypre(node **process)
 {
@@ -770,7 +760,7 @@ void prioritypre(node **process)
             count--;
         }
     }
-    menu(*process);
+    
 }
 void rrpre(struct node *head)
 {
@@ -792,7 +782,7 @@ void rrpre(struct node *head)
 void fcfs(struct node *head)
 {
 
-    smethod = "first come first served";
+    smethod = "first come first served _ non preemtive";
     pidsort(head);
     arrivalsort(head);
 
@@ -823,7 +813,7 @@ void fcfs(struct node *head)
         timer += current->burst;
         current = current->next;
     }
-    menu(head);
+    
 }
 
 // result and displaying functions
@@ -870,7 +860,7 @@ void result(struct node *process)
         temp = temp->next;
     }
     float averageWaitingTime = totalWaitingTime / length(process);
-    cout << "Average Waiting Time: " << averageWaitingTime << "\n";
-    outputfile << "Average Waiting Time: " << averageWaitingTime << "\n"
+    cout << "Average Waiting Time: " << averageWaitingTime << endl<<endl;
+    outputfile << "Average Waiting Time: " << averageWaitingTime <<endl
                << endl;
 }
