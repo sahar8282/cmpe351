@@ -10,10 +10,11 @@ void sjfnonpre(node **);
 void sjfpre(node **);
 void prioritynonpre(struct node *);
 void prioritypre(node **);
-void rrpre(struct node *);
+void rrpre(struct node **);
 void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
+struct node *match(struct process *, int );
 void display(struct node *);
 void swapNode(struct node *&, struct node *&);
 void arrivalsort(struct node *&);
@@ -21,6 +22,9 @@ void apsort(struct node *&);
 void burstsort(struct node *&);
 void prioritysort(struct node *&);
 void pidsort(struct node *&);
+struct node *pop(struct process **);
+struct node *push(struct node *, struct node *);
+bool isdone(struct node *);
 struct node
 {
     int burst, arrival, priority, waitingtime;
@@ -35,6 +39,7 @@ string outputFilename;
 string smethod;
 int id = 1;
 bool preemtive;
+int quantum;
 // main and menu functions
 int main(int argc, char *argv[])
 {
@@ -107,7 +112,6 @@ int main(int argc, char *argv[])
             return 1;
     }
 
-   
     menu(process);
     return 0;
 }
@@ -144,11 +148,14 @@ void menu(struct node *process)
         {
         case '1':
             if (!preemtive)
-               { fcfs(process);
-                menu(process);}
+            {
+                fcfs(process);
+                menu(process);
+            }
             else
             {
-                cout << "warning : fcfs doesn't support preemtive mode but you can see nonpreemtive in result" << endl;
+                cout << "warning : fcfs doesn't support preemtive mode but you can see nonpreemtive in result" << endl
+                     << endl;
                 fcfs(process);
                 menu(process);
             }
@@ -157,8 +164,10 @@ void menu(struct node *process)
 
         case '2':
             if (!preemtive)
-               { sjfnonpre(&process);
-               menu(process);}
+            {
+                sjfnonpre(&process);
+                menu(process);
+            }
             else
             {
                 sjfpre(&process);
@@ -167,9 +176,12 @@ void menu(struct node *process)
 
             break;
         case '3':
+
             if (!preemtive)
-                {prioritynonpre(process);
-                menu(process);}
+            {
+                prioritynonpre(process);
+                menu(process);
+            }
             else
             {
                 prioritypre(&process);
@@ -178,21 +190,27 @@ void menu(struct node *process)
 
             break;
         case '4':
-            /*  if (!preemtive)
-              {
-                  cout << "warning : round robin doesn't support non preemtive mode but you can see preemtive in result" << endl;
-                  rrpre(process);
-                  menu(process);
-              }
-              else
-              {
-                  rrpre(process);
-                  menu(process);
-              }
-  */
-            break;
+
+            /*cout << "please enter time quantum for Round Robin : ";
+            cin >> quantum;
+
+            if (!preemtive)
+            {
+                cout << "warning : round robin doesn't support non preemtive mode but you can see preemtive in result" << endl
+                     << endl;
+                rrpre(&process);
+                menu(process);
+            }
+            else
+            {
+                rrpre(&process);
+                menu(process);
+            }
+
+            break;*/
         case '5':
-            cout << "you choose non of the methodes" << endl;
+            cout << "you choose non of the methodes" << endl
+                 << endl;
             menu(process);
 
             break;
@@ -201,7 +219,8 @@ void menu(struct node *process)
             break;
 
         default:
-            cout << "wrong choice";
+            cout << "wrong choice" << endl
+                 << endl;
             menu(process);
             break;
         }
@@ -224,34 +243,44 @@ void menu(struct node *process)
         break;
 
     case '3':
-    if(smethod=="")
-    {
-        cout << "you didn't choose any method please select a method : " << endl;
-        menu(process);
-    }else{
-        result(process);
-        menu(process);}
+        if (smethod == "")
+        {
+            cout << "you didn't choose any method please select a method : " << endl
+                 << endl;
+            menu(process);
+        }
+        else
+        {
+            result(process);
+            menu(process);
+        }
         break;
 
-    case '4': 
-    
+    case '4':
+
         fcfs(process);
         result(process);
-        sjfnonpre(&process);
-        result(process);
-        preemtive=true;
-        sjfpre(&process);
-        result(process);
-        preemtive=false;
+
+        preemtive = false;
         prioritynonpre(process);
         result(process);
-        preemtive=true;
+
+        preemtive = true;
         prioritypre(&process);
         result(process);
-      /* preemtive=true;
-       rrpre(process);
+
+        preemtive = true;
+        sjfpre(&process);
         result(process);
-*/
+
+        preemtive = false;
+        sjfnonpre(&process);
+        result(process);
+
+       /* quantum = 2;
+        preemtive = true;
+        rrpre(&process);
+        result(process);*/
         exit(1);
         break;
 
@@ -303,32 +332,6 @@ int length(struct node *head)
         temp = temp->next;
     }
     return len;
-}
-struct node *push(struct node *header, int burst, int arrival, int priority, int pid, int timepassed, bool executed, int waitingtime)
-{
-    struct node *temp;
-    temp = (struct node *)malloc(sizeof(struct node));
-    temp->burst = burst;
-    temp->arrival = arrival;
-    temp->priority = priority;
-    temp->waitingtime = waitingtime;
-    temp->next = NULL;
-    temp->pid = pid;
-    temp->executed = executed;
-    temp->timepassed = timepassed;
-    if (header == NULL)
-    {
-        header = temp;
-        return header;
-    }
-
-    struct node *headertemp;
-    headertemp = header;
-    while (headertemp->next != NULL)
-        headertemp = headertemp->next;
-
-    headertemp->next = temp;
-    return header;
 }
 // swapping func used in sort
 void swapNode(struct node *&a, struct node *&b)
@@ -546,22 +549,27 @@ void sjfnonpre(node **process)
 
     while (count > 0)
     {
-        temp = *process;
+        
         min = NULL;
         while (min == NULL)
         {
+            temp = *process;
             while (temp != NULL)
             {
                 if (temp->arrival <= timer && !temp->executed)
                 {
 
-                    if (min == NULL|| (temp->burst < min->burst && min->arrival > temp->arrival))
+                    if (min == NULL || (temp->burst < min->burst && min->arrival > temp->arrival))
                     {
                         min = temp;
                     }
                 }
                 temp = temp->next;
             }
+             if (min == NULL)
+        {
+            timer++;
+        }
         }
 
         if (min == NULL)
@@ -577,8 +585,6 @@ void sjfnonpre(node **process)
             count--;
         }
     }
-
-    
 }
 void sjfpre(node **process)
 {
@@ -595,15 +601,17 @@ void sjfpre(node **process)
     for (int i = 0; i < length(*process); i++)
     {
         temp->timepassed = 0;
+        temp->waitingtime = 0;
         temp = temp->next;
     }
 
     while (count > 0)
     {
-        temp = *process;
+        
         min = NULL;
         while (min == NULL)
         {
+            temp = *process;
             while (temp != NULL)
             {
                 if (timer >= temp->arrival)
@@ -638,7 +646,6 @@ void sjfpre(node **process)
             count--;
         }
     }
-   
 }
 void prioritynonpre(struct node *head)
 {
@@ -699,8 +706,6 @@ void prioritynonpre(struct node *head)
             select->executed = true;
         }
     }
-
-    
 }
 void prioritypre(node **process)
 {
@@ -722,10 +727,11 @@ void prioritypre(node **process)
 
     while (count > 0)
     {
-        temp = *process;
+        
         min = NULL;
         while (min == NULL)
         {
+            temp = *process;
             while (temp != NULL)
             {
                 if (timer >= temp->arrival)
@@ -759,24 +765,6 @@ void prioritypre(node **process)
             min->waitingtime = timer - min->arrival - min->burst;
             count--;
         }
-    }
-    
-}
-void rrpre(struct node *head)
-{
-    smethod = "round robbin _ preemtive";
-
-    struct node *temp = head;
-    for (int i = 0; i < length(head); i++)
-    {
-        temp->timepassed = 0;
-        temp = temp->next;
-    }
-
-    for (int i = 0; i < length(head); i++)
-    {
-        temp->executed = false;
-        temp = temp->next;
     }
 }
 void fcfs(struct node *head)
@@ -813,7 +801,6 @@ void fcfs(struct node *head)
         timer += current->burst;
         current = current->next;
     }
-    
 }
 
 // result and displaying functions
@@ -845,22 +832,43 @@ void result(struct node *process)
         cerr << "Error opening the file!" << endl;
         return;
     }
-
-    cout << "Scheduling method : " << smethod << endl;
-    outputfile << "Scheduling method : " << smethod << endl;
-    for (int i = 0; i < length(process); i++)
+    if (smethod == "round robbin _ preemtive")
     {
-        cout << "p" << temp->pid << " : "
-             << "waiting time = " << temp->waitingtime << endl;
 
-        outputfile << "p" << temp->pid << " : "
-                   << "waiting time = " << temp->waitingtime << endl;
+        cout << "Scheduling method : " << smethod << " _time quantum : " << quantum << endl;
+        outputfile << "Scheduling method : " << smethod << " _time quantum : " << quantum << endl;
+        for (int i = 0; i < length(process); i++)
+        {
+            cout << "p" << temp->pid << " : "
+                 << "waiting time = " << temp->waitingtime << endl;
 
-        totalWaitingTime += temp->waitingtime;
-        temp = temp->next;
+            outputfile << "p" << temp->pid << " : "
+                       << "waiting time = " << temp->waitingtime << endl;
+
+            totalWaitingTime += temp->waitingtime;
+            temp = temp->next;
+        }
     }
+    else
+    {
+        cout << "Scheduling method : " << smethod << endl;
+        outputfile << "Scheduling method : " << smethod << endl;
+        for (int i = 0; i < length(process); i++)
+        {
+            cout << "p" << temp->pid << " : "
+                 << "waiting time = " << temp->waitingtime << endl;
+
+            outputfile << "p" << temp->pid << " : "
+                       << "waiting time = " << temp->waitingtime << endl;
+
+            totalWaitingTime += temp->waitingtime;
+            temp = temp->next;
+        }
+    }
+
     float averageWaitingTime = totalWaitingTime / length(process);
-    cout << "Average Waiting Time: " << averageWaitingTime << endl<<endl;
-    outputfile << "Average Waiting Time: " << averageWaitingTime <<endl
+    cout << "Average Waiting Time: " << averageWaitingTime << endl
+         << endl;
+    outputfile << "Average Waiting Time: " << averageWaitingTime << endl
                << endl;
 }
