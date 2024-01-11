@@ -275,10 +275,10 @@ void menu(struct node *process)
         sjfnonpre(&process);
         result(process);
 
-        /* quantum = 2;
+        quantum = 2;
          preemtive = true;
          rrpre(&process);
-         result(process);*/
+         result(process);
         exit(1);
         break;
 
@@ -507,7 +507,7 @@ void pidsort(struct node *&head)
 void apsort(struct node *&head)
 {
     //this func first sort according to arrival then priority
-    
+
     if (head == NULL || head->next == NULL)
     {
         return;
@@ -898,8 +898,8 @@ void rrpre(struct node **process)
         }
     }
 }
-    // result and displaying functions
-    void display(struct node * h)
+// result and displaying functions
+void display(struct node * h)
     {
 
         if (h == NULL)
@@ -914,7 +914,7 @@ void rrpre(struct node **process)
         }
         cout << endl;
     }
-    void result(struct node * process)
+void result(struct node * process)
     {
         pidsort(process);
         struct node *temp = process;
