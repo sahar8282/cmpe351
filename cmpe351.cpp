@@ -14,7 +14,6 @@ void rrpre(struct node **);
 void result(struct node *);
 struct node *insertBack(struct node *, int, int, int);
 struct node *createNode(int, int, int);
-struct node *match(struct process *, int );
 void display(struct node *);
 void swapNode(struct node *&, struct node *&);
 void arrivalsort(struct node *&);
@@ -24,7 +23,6 @@ void prioritysort(struct node *&);
 void pidsort(struct node *&);
 struct node *pop(struct process **);
 struct node *push(struct node *, struct node *);
-bool isdone(struct node *);
 struct node
 {
     int burst, arrival, priority, waitingtime;
@@ -191,7 +189,7 @@ void menu(struct node *process)
             break;
         case '4':
 
-            /*cout << "please enter time quantum for Round Robin : ";
+            cout << "please enter time quantum for Round Robin : ";
             cin >> quantum;
 
             if (!preemtive)
@@ -207,7 +205,7 @@ void menu(struct node *process)
                 menu(process);
             }
 
-            break;*/
+            break;
         case '5':
             cout << "you choose non of the methodes" << endl
                  << endl;
@@ -277,10 +275,10 @@ void menu(struct node *process)
         sjfnonpre(&process);
         result(process);
 
-       /* quantum = 2;
-        preemtive = true;
-        rrpre(&process);
-        result(process);*/
+        /* quantum = 2;
+         preemtive = true;
+         rrpre(&process);
+         result(process);*/
         exit(1);
         break;
 
@@ -333,6 +331,35 @@ int length(struct node *head)
     }
     return len;
 }
+struct node *push(struct node *process, struct node *head)
+{
+    struct node *temp = createNode(head->burst, head->arrival, head->priority);
+    temp->pid = head->pid;
+    temp->timepassed = head->timepassed;
+    temp->executed = head->executed;
+    struct node *x;
+    if (process == NULL)
+    {
+        process = temp;
+        return process;
+    }
+    x = process;
+    while (x->next != NULL)
+        x = x->next;
+    x->next = temp;
+    return process;
+}
+struct node *pop(struct node **process)
+{
+
+    if (*process == NULL)
+        return NULL;
+    struct node *temp = *process;
+    *process = temp->next;
+
+    return temp;
+}
+
 // swapping func used in sort
 void swapNode(struct node *&a, struct node *&b)
 {
@@ -479,6 +506,8 @@ void pidsort(struct node *&head)
 }
 void apsort(struct node *&head)
 {
+    //this func first sort according to arrival then priority
+    
     if (head == NULL || head->next == NULL)
     {
         return;
@@ -549,7 +578,7 @@ void sjfnonpre(node **process)
 
     while (count > 0)
     {
-        
+
         min = NULL;
         while (min == NULL)
         {
@@ -566,10 +595,10 @@ void sjfnonpre(node **process)
                 }
                 temp = temp->next;
             }
-             if (min == NULL)
-        {
-            timer++;
-        }
+            if (min == NULL)
+            {
+                timer++;
+            }
         }
 
         if (min == NULL)
@@ -607,7 +636,7 @@ void sjfpre(node **process)
 
     while (count > 0)
     {
-        
+
         min = NULL;
         while (min == NULL)
         {
@@ -727,7 +756,7 @@ void prioritypre(node **process)
 
     while (count > 0)
     {
-        
+
         min = NULL;
         while (min == NULL)
         {
@@ -769,7 +798,6 @@ void prioritypre(node **process)
 }
 void fcfs(struct node *head)
 {
-
     smethod = "first come first served _ non preemtive";
     pidsort(head);
     arrivalsort(head);
@@ -802,73 +830,140 @@ void fcfs(struct node *head)
         current = current->next;
     }
 }
-
-// result and displaying functions
-void display(struct node *h)
+void rrpre(struct node **process)
 {
-
-    if (h == NULL)
-        cout << "empty";
-
-    struct node *t = h;
-    while (t != NULL)
+    smethod = "round robbin _ preemtive";
+    pidsort(*process);
+    arrivalsort(*process);
+    int timer = 0;
+    int count = 0;
+    struct node *temp = *process;
+    struct node *queue = NULL;
+    struct node *min = NULL;
+    for (int i = 0; i < length(*process); i++)
     {
-        cout << t->burst << "," << t->arrival << "," << t->priority << " , "
-             << "id : " << t->pid << endl;
-        t = t->next;
+        temp->timepassed = 0;
+        temp->executed = false;
+        temp = temp->next;
     }
-    cout << endl;
-}
-void result(struct node *process)
-{
-    pidsort(process);
-    struct node *temp = process;
-    float totalWaitingTime = 0.0;
-
-    ofstream outputfile(outputFilename, std::ios::app);
-
-    if (!outputfile.is_open())
+    
+    while (queue != NULL || count < length(*process))
     {
-        cerr << "Error opening the file!" << endl;
-        return;
-    }
-    if (smethod == "round robbin _ preemtive")
-    {
-
-        cout << "Scheduling method : " << smethod << " _time quantum : " << quantum << endl;
-        outputfile << "Scheduling method : " << smethod << " _time quantum : " << quantum << endl;
-        for (int i = 0; i < length(process); i++)
+        temp = *process;
+        while (temp != NULL && temp->arrival <= timer)
         {
-            cout << "p" << temp->pid << " : "
-                 << "waiting time = " << temp->waitingtime << endl;
-
-            outputfile << "p" << temp->pid << " : "
-                       << "waiting time = " << temp->waitingtime << endl;
-
-            totalWaitingTime += temp->waitingtime;
+            if (!temp->executed && temp->timepassed < temp->burst)
+            { 
+                temp->executed = true;
+                queue = push(queue, temp);
+            }
             temp = temp->next;
         }
-    }
-    else
-    {
-        cout << "Scheduling method : " << smethod << endl;
-        outputfile << "Scheduling method : " << smethod << endl;
-        for (int i = 0; i < length(process); i++)
+
+        struct node* match = NULL;
+
+        if (queue != NULL)
         {
-            cout << "p" << temp->pid << " : "
-                 << "waiting time = " << temp->waitingtime << endl;
+            min = pop(&queue);
 
-            outputfile << "p" << temp->pid << " : "
-                       << "waiting time = " << temp->waitingtime << endl;
+            match = *process;
+            while (match != NULL)
+            {
+                if (match->pid == min->pid)
+                    break;
+                match = match->next;
+            }
 
-            totalWaitingTime += temp->waitingtime;
-            temp = temp->next;
+            match->executed = false;
+
+            if (match->burst - match->timepassed > quantum)
+            {
+                timer += quantum;
+                match->timepassed +=quantum;
+                match->executed = true;
+                queue = push(queue, min);
+            }
+            else
+            {
+                timer += match->burst - match->timepassed;
+                match->waitingtime = timer - match->arrival - match->burst;
+                match->timepassed = match->burst;
+                match = NULL;
+                count++;
+            }
+        }
+        if (!(match != NULL || temp == NULL || queue != NULL))
+        {
+            timer = temp->arrival;
         }
     }
-
-    float averageWaitingTime = totalWaitingTime / length(process);
-    cout << "Average Waiting Time: " << averageWaitingTime << endl
-         << endl;
-    outputfile << "Average Waiting Time: " << averageWaitingTime << endl
-               << endl;
 }
+    // result and displaying functions
+    void display(struct node * h)
+    {
+
+        if (h == NULL)
+            cout << "empty";
+
+        struct node *t = h;
+        while (t != NULL)
+        {
+            cout << t->burst << "," << t->arrival << "," << t->priority << " , "
+                 << "id : " << t->pid << endl;
+            t = t->next;
+        }
+        cout << endl;
+    }
+    void result(struct node * process)
+    {
+        pidsort(process);
+        struct node *temp = process;
+        float totalWaitingTime = 0.0;
+
+        ofstream outputfile(outputFilename, std::ios::app);
+
+        if (!outputfile.is_open())
+        {
+            cerr << "Error opening the file!" << endl;
+            return;
+        }
+        if (smethod == "round robbin _ preemtive")
+        {
+
+            cout << "Scheduling method : " << smethod << " _time quantum : " << quantum << endl;
+            outputfile << "Scheduling method : " << smethod << " _time quantum : " << quantum << endl;
+            for (int i = 0; i < length(process); i++)
+            {
+                cout << "p" << temp->pid << " : "
+                     << "waiting time = " << temp->waitingtime << endl;
+
+                outputfile << "p" << temp->pid << " : "
+                           << "waiting time = " << temp->waitingtime << endl;
+
+                totalWaitingTime += temp->waitingtime;
+                temp = temp->next;
+            }
+        }
+        else
+        {
+            cout << "Scheduling method : " << smethod << endl;
+            outputfile << "Scheduling method : " << smethod << endl;
+            for (int i = 0; i < length(process); i++)
+            {
+                cout << "p" << temp->pid << " : "
+                     << "waiting time = " << temp->waitingtime << endl;
+
+                outputfile << "p" << temp->pid << " : "
+                           << "waiting time = " << temp->waitingtime << endl;
+
+                totalWaitingTime += temp->waitingtime;
+                temp = temp->next;
+            }
+        }
+
+        float averageWaitingTime = totalWaitingTime / length(process);
+        cout << "Average Waiting Time: " << averageWaitingTime << endl
+             << endl;
+        outputfile << "Average Waiting Time: " << averageWaitingTime << endl
+                   << endl;
+    }
